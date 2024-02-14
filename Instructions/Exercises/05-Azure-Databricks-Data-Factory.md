@@ -13,7 +13,7 @@ lab:
 
 > **提示**：如果你已有 Azure Databricks 工作区，则可以跳过此过程并使用现有工作区。
 
-本练习包括一个用于预配新 Azure Databricks 工作区的脚本。 该脚本尝试在一个区域中创建高级** 层 Azure Databricks 工作区资源，而该区域中的 Azure 订阅具有足够的用于本练习所需计算核心的配额；该脚本假设你的用户帐户在订阅中具有足够的权限来创建 Azure Databricks 工作区资源。 如果脚本由于配额或权限不足而失败，可以尝试在 Azure 门户中以交互方式创建 Azure Databricks 工作区。
+本练习包括一个用于预配新 Azure Databricks 工作区的脚本。 该脚本会尝试在一个区域中创建*高级*层 Azure Databricks 工作区资源，在该区域中，Azure 订阅具有本练习所需计算核心的充足配额；该脚本假设你的用户帐户在订阅中具有足够的权限来创建 Azure Databricks 工作区资源。 如果脚本由于配额或权限不足而失败，可以尝试在 Azure 门户中以交互方式创建 Azure Databricks 工作区。
 
 1. 在 Web 浏览器中，登录到 [Azure 门户](https://portal.azure.com)，网址为 `https://portal.azure.com`。
 2. 使用页面顶部搜索栏右侧的 [\>_] 按钮在 Azure 门户中创建新的 Cloud Shell，在出现提示时选择“PowerShell”环境并创建存储。 Cloud Shell 在 Azure 门户底部的窗格中提供命令行界面，如下所示：
@@ -31,7 +31,7 @@ lab:
     git clone https://github.com/MicrosoftLearning/mslearn-databricks
     ```
 
-5. 克隆存储库后，请输入以下命令以运行 setup.ps1**** 脚本，该脚本会在可用区域中预配 Azure Databricks 工作区：
+5. 克隆存储库后，请输入以下命令以运行 **setup.ps1** 脚本，以在可用区域中预配 Azure Databricks 工作区：
 
     ```
     ./mslearn-databricks/setup.ps1
@@ -58,7 +58,7 @@ lab:
 可以在 Azure Databricks 工作区中创建笔记本，运行用一系列编程语言编写的代码。 在本练习中，你将创建一个简单的笔记本，用于从文件中引入数据并将其保存在 Databricks 文件系统 (DBFS) 的文件夹中。
 
 1. 在 Azure 门户中，浏览到已由脚本创建的 msl-xxxxxxx****** 资源组（或包含现有 Azure Databricks 工作区的资源组）
-1. 选择 Azure Databricks 服务资源（如果已使用安装脚本创建，则名为 databricks-xxxxxxx******）。
+1. 选择 Azure Databricks 服务资源（如果已使用安装脚本创建，则名为 **databricks-xxxxxxx***）。
 1. 在工作区的“概述”**** 页中，使用“启动工作区”**** 按钮在新的浏览器标签页中打开 Azure Databricks 工作区；请在出现提示时登录。
 
     > 提示：使用 Databricks 工作区门户时，可能会显示各种提示和通知。 消除这些内容，并按照提供的说明完成本练习中的任务。
@@ -107,7 +107,7 @@ lab:
 
 ### 在 Azure 数据工厂中创建链接服务
 
-1. 返回到 Azure 门户，在 dp203-xxxxxxx 资源组中，选择 Azure 数据工厂资源 adfxxxxxxx 。
+1. 返回到 Azure 门户，在 msl-*xxxxxxx* 资源组中，选择 Azure 数据工厂资源 adf*xxxxxxx*。********
 2. 在“概述”页上，选择“启动工作室”以打开 Azure 数据工厂工作室 。 根据提示登录。
 3. 在 Azure 数据工厂工作室中，使用 >> 图标展开左侧的导航窗格。 然后选择“管理”页。
 4. 在“管理”页的“链接服务”选项卡中，选择“+ 新建”添加新的链接服务  。
@@ -158,6 +158,7 @@ lab:
     > 注意：如果管道运行失败，则订阅在预配 Azure Databricks 工作区的区域中的配额可能不足，无法创建作业群集。 请参阅 [CPU 内核限制阻止创建群集](https://docs.microsoft.com/azure/databricks/kb/clusters/azure-core-limit)，了解详细信息。 如果发生这种情况，可以尝试删除工作区，并在其他区域创建新工作区。 可以将区域指定为设置脚本的参数，如下所示：`./setup.ps1 eastus`
 
 4. 运行成功后，选择其名称，查看运行详细信息。 然后，在“使用 Databricks 处理数据”页的“活动运行”部分，选择“处理数据”活动，并使用其“输出”图标查看该活动的输出 JSON，应如下所示  ：
+
     ```json
     {
         "runPageUrl": "https://adb-..../run/...",
