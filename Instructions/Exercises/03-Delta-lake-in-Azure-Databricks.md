@@ -13,7 +13,7 @@ Delta Lake 是一个开源项目，用于在数据湖之上为 Spark 生成事�
 
 > **提示**：如果你已有 Azure Databricks 工作区，则可以跳过此过程并使用现有工作区。
 
-本练习包括一个用于预配新 Azure Databricks 工作区的脚本。 该脚本尝试在一个区域中创建高级** 层 Azure Databricks 工作区资源，而该区域中的 Azure 订阅具有足够的用于本练习所需计算核心的配额；该脚本假设你的用户帐户在订阅中具有足够的权限来创建 Azure Databricks 工作区资源。 如果脚本由于配额或权限不足而失败，可以尝试在 Azure 门户中以交互方式创建 Azure Databricks 工作区。
+本练习包括一个用于预配新 Azure Databricks 工作区的脚本。 该脚本会尝试在一个区域中创建*高级*层 Azure Databricks 工作区资源，在该区域中，Azure 订阅具有本练习所需计算核心的充足配额；该脚本假设你的用户帐户在订阅中具有足够的权限来创建 Azure Databricks 工作区资源。 如果脚本由于配额或权限不足而失败，可以尝试 [在 Azure 门户中以交互方式创建 Azure Databricks 工作区](https://learn.microsoft.com/azure/databricks/getting-started/#--create-an-azure-databricks-workspace)。
 
 1. 在 Web 浏览器中，登录到 [Azure 门户](https://portal.azure.com)，网址为 `https://portal.azure.com`。
 2. 使用页面顶部搜索栏右侧的 [\>_] 按钮在 Azure 门户中创建新的 Cloud Shell，在出现提示时选择“PowerShell”环境并创建存储。 Cloud Shell 在 Azure 门户底部的窗格中提供命令行界面，如下所示：
@@ -31,7 +31,7 @@ Delta Lake 是一个开源项目，用于在数据湖之上为 Spark 生成事�
     git clone https://github.com/MicrosoftLearning/mslearn-databricks
     ```
 
-5. 克隆存储库后，请输入以下命令以运行 setup.ps1**** 脚本，该脚本会在可用区域中预配 Azure Databricks 工作区：
+5. 克隆存储库后，请输入以下命令以运行 **setup.ps1** 脚本，以在可用区域中预配 Azure Databricks 工作区：
 
     ```powershell
     ./mslearn-databricks/setup.ps1
@@ -44,21 +44,21 @@ Delta Lake 是一个开源项目，用于在数据湖之上为 Spark 生成事�
 
 Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集在多个节点上并行处理数据。 每个群集由一个用于协调工作的驱动程序节点和多个用于执行处理任务的工作器节点组成。 在本练习中，将创建一个*单节点*群集，以最大程度地减少实验室环境中使用的计算资源（在实验室环境中，资源可能会受到限制）。 在生产环境中，通常会创建具有多个工作器节点的群集。
 
-> **提示**：如果 Azure Databricks 工作区中已有一个具有 13.3 LTS 或更高运行时版本的群集，则可以使用它来完成此练习并跳过此过程。
+> **提示**：如果 Azure Databricks 工作区中已有一个具有 13.3 LTS ML 或更高运行时版本的群集，则可以使用它来完成此练习并跳过此过程。
 
-1. 在 Azure 门户中，浏览到已由脚本创建的 msl-xxxxxxx****** 资源组（或包含现有 Azure Databricks 工作区的资源组）
-1. 选择 Azure Databricks 服务资源（如果已使用安装脚本创建，则名为 databricks-xxxxxxx******）。
+1. 在 Azure 门户中，浏览到已由脚本创建的 **msl-xxxxxxx*** 资源组（或包含现有 Azure Databricks 工作区的资源组）
+1. 选择 Azure Databricks 服务资源（如果已使用安装脚本创建，则名为 **databricks-xxxxxxx***）。
 1. 在工作区的“概述”**** 页中，使用“启动工作区”**** 按钮在新的浏览器标签页中打开 Azure Databricks 工作区；请在出现提示时登录。
 
     > 提示：使用 Databricks 工作区门户时，可能会显示各种提示和通知。 消除这些内容，并按照提供的说明完成本练习中的任务。
 
-1. 在左侧边栏中，选择“(+)新建”任务，然后选择“群集”********。
+1. 在左侧边栏中，选择“**(+) 新建**”任务，然后选择“**群集**”。
 1. 在“新建群集”页中，使用以下设置创建新群集：
     - 群集名称：用户名的群集（默认群集名称）
     - **策略**：非受限
     - 群集模式：单节点
     - 访问模式：单用户（选择你的用户帐户）
-    - Databricks Runtime 版本****：13.3 LTS（Spark 3.4.1、Scala 2.12）或更高版本
+    - **Databricks 运行时版本**：13.3 LTS（Spark 3.4.1、Scala 2.12）或更高版本
     - 使用 Photon 加速：已选择
     - 节点类型：Standard_DS3_v2
     - 在处于不活动状态 20 分钟后终止**********
@@ -73,7 +73,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 1. 在边栏中，使用“(+) 新建”**** 链接创建**笔记本**。
 1. 将默认笔记本名称（**Untitled Notebook *[日期]***）更改为“Explore Delta Lake”，然后在“连接”下拉列表中选择群集（如果尚未选中）****。**** 如果群集未运行，可能需要一分钟左右才能启动。
-1. 在笔记本的第一个单元格中输入以下代码，该代码使用 shell** 命令将数据文件从 GitHub 下载到群集使用的 Databricks 文件系统 (DBFS) 中。
+1. 在笔记本的第一个单元格中输入以下代码，该代码使用 *shell* 命令将数据文件从 GitHub 下载到群集使用的文件系统中。
 
     ```python
     %sh
@@ -82,7 +82,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
     wget -O /dbfs/delta_lab/products.csv https://raw.githubusercontent.com/MicrosoftLearning/mslearn-databricks/main/data/products.csv
     ```
 
-1. 使用以下单元格右上角的“&#9656; 运行单元格”菜单选项来运行它****。 然后等待代码运行的 Spark 作业完成。
+1. 使用单元格左侧的“&#9656; 运行单元格”菜单选项来运行该代码****。 然后等待代码运行的 Spark 作业完成。
 1. 在现有代码单元格下，使用 + 图标添加新的代码单元格****。 然后在新单元格中输入并运行以下代码，以便从文件加载数据并查看前 10 行。
 
     ```python
@@ -139,7 +139,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 数据修改会被记录下来，使你能够使用 Delta Lake 的“按时间顺序查看”** 功能来查看数据的先前版本。 
 
-1. 在新的代码单元格中，使用以下代码查看产品数据的原始版本：
+1. 在新建代码单元格中，使用以下代码查看产品数据的原始版本：
 
     ```python
    new_df = spark.read.format("delta").option("versionAsOf", 0).load(delta_table_path)
@@ -156,8 +156,8 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 到目前为止，你已通过从包含表所基于 parquet 文件的文件夹加载数据来处理 Delta 表。 可以定义封装数据的目录表，并提供可以在 SQL 代码中引用的命名表实体**。 对于 Delta Lake，Spark 支持两种类型的目录表：
 
-- 由包含表数据的 parquet 文件的路径定义的外部表**。
-- 在 Hive 元存储中为 Spark 群集定义的托管表**。
+- 由指向包含表数据的文件的路径定义的 *外部* 表。
+- 在元存储中定义的 *托管表*。
 
 ### 创建外部表
 
@@ -188,7 +188,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
    spark.sql("DESCRIBE EXTENDED AdventureWorks.ProductsManaged").show(truncate=False)
     ```
 
-    你没有为表使用的 parquet 文件指定路径，在 Hive 元存储中系统会为你管理该路径，并将其显示在表说明的 Location 属性中（在 dbfs:/user/hive/warehouse/ 路径中）********。
+    你没有为表使用的 parquet 文件指定路径 - 在 Hive 元存储中系统会为你管理此项，并将其显示在表说明的 **位置** 属性中。
 
 1. 使用以下代码来查询托管表，请注意，该语法与托管表的语法相同：
 
@@ -357,6 +357,6 @@ Delta Lake 支持流式处理数据。** Delta 表可以是接收器，也可以
 
 ## 清理
 
-在 Azure Databricks 门户的“计算”页面上，选择你的群集，然后选择“&#9632; 终止”以将其关闭。********
+在 Azure Databricks 门户的“**计算**”页上，选择群集，然后选择“**&#9632; 终止**”以将其关闭。
 
-如果已完成对 Azure Databricks 的探索，则现在可以删除已创建的资源，以避免产生不必要的 Azure 成本并释放订阅中的容量。
+如果已完成对 Azure Databricks 的探索，则可以删除已创建的资源，以避免产生不必要的 Azure 成本并释放订阅中的容量。

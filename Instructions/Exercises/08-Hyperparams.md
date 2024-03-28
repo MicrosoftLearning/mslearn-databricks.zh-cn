@@ -17,7 +17,7 @@ lab:
 
 > **提示**：如果你已有 Azure Databricks 工作区，则可以跳过此过程并使用现有工作区。
 
-本练习包括一个用于预配新 Azure Databricks 工作区的脚本。 该脚本尝试在一个区域中创建高级** 层 Azure Databricks 工作区资源，而该区域中的 Azure 订阅具有足够的用于本练习所需计算核心的配额；该脚本假设你的用户帐户在订阅中具有足够的权限来创建 Azure Databricks 工作区资源。 如果脚本由于配额或权限不足而失败，可以尝试在 Azure 门户中以交互方式创建 Azure Databricks 工作区。
+本练习包括一个用于预配新 Azure Databricks 工作区的脚本。 该脚本会尝试在一个区域中创建*高级*层 Azure Databricks 工作区资源，在该区域中，Azure 订阅具有本练习所需计算核心的充足配额；该脚本假设你的用户帐户在订阅中具有足够的权限来创建 Azure Databricks 工作区资源。 如果脚本由于配额或权限不足而失败，可以尝试在 [Azure 门户中以交互方式创建 Azure Databricks 工作区](https://learn.microsoft.com/azure/databricks/getting-started/#--create-an-azure-databricks-workspace)。
 
 1. 在 Web 浏览器中，登录到 [Azure 门户](https://portal.azure.com)，网址为 `https://portal.azure.com`。
 2. 使用页面顶部搜索栏右侧的 [\>_] 按钮在 Azure 门户中创建新的 Cloud Shell，在出现提示时选择“PowerShell”环境并创建存储。 Cloud Shell 在 Azure 门户底部的窗格中提供命令行界面，如下所示：
@@ -35,7 +35,7 @@ lab:
     git clone https://github.com/MicrosoftLearning/mslearn-databricks
     ```
 
-5. 克隆存储库后，请输入以下命令以运行 setup.ps1**** 脚本，该脚本会在可用区域中预配 Azure Databricks 工作区：
+5. 克隆存储库后，请输入以下命令以运行 **setup.ps1** 脚本，以在可用区域中预配 Azure Databricks 工作区：
 
     ```
     ./mslearn-databricks/setup.ps1
@@ -51,12 +51,12 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 > **提示**：如果 Azure Databricks 工作区中已有一个具有 13.3 LTS ML**<u></u>** 或更高运行时版本的群集，则可以使用它来完成此练习并跳过此过程。
 
 1. 在 Azure 门户中，浏览到已由脚本创建的 msl-xxxxxxx****** 资源组（或包含现有 Azure Databricks 工作区的资源组）
-1. 选择 Azure Databricks 服务资源（如果已使用安装脚本创建，则名为 databricks-xxxxxxx******）。
+1. 选择 Azure Databricks 服务资源（如果已使用安装脚本创建，则名为 **databricks-xxxxxxx***）。
 1. 在工作区的“概述”**** 页中，使用“启动工作区”**** 按钮在新的浏览器标签页中打开 Azure Databricks 工作区；请在出现提示时登录。
 
     > 提示：使用 Databricks 工作区门户时，可能会显示各种提示和通知。 消除这些内容，并按照提供的说明完成本练习中的任务。
 
-1. 在左侧边栏中，选择“(+)新建”任务，然后选择“群集”********。
+1. 在左侧边栏中，选择“**(+) 新建**”任务，然后选择“**群集**”。
 1. 在“新建群集”页中，使用以下设置创建新群集：
     - 群集名称：用户名的群集（默认群集名称）
     - **策略**：非受限
@@ -65,7 +65,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
     - Databricks Runtime 版本****：选择最新非 beta 版本运行时的 ML***<u></u>** 版本（不是****标准运行时版本），该版本符合以下条件：*
         - 不使用 GPU**
         - 包括 Scala > 2.11
-        - 包括 Spark (> 3.4)******
+        - *包括 Spark > **3.4***
     - 使用 Photon 加速****：未选定<u></u>
     - 节点类型：Standard_DS3_v2
     - 在处于不活动状态 20 分钟后终止**********
@@ -87,7 +87,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 > **引文**：本练习中使用的企鹅数据集是 [Kristen Gorman 博 士](https://www.uaf.edu/cfos/people/faculty/detail/kristen-gorman.php)和[长期生态研究网络](https://lternet.edu/)成员[南极洲帕默站](https://pal.lternet.edu/)收集并提供的数据的子集。
 
-1. 在笔记本的第一个单元格中输入以下代码，该代码使用 shell** 命令将企鹅数据从 GitHub 下载到群集使用的 Databricks 文件系统 (DBFS) 中。
+1. 在笔记本的第一个单元格中输入以下代码，该代码使用 shell** 命令将企鹅数据从 GitHub 下载到群集使用的文件系统中。
 
     ```bash
     %sh
@@ -96,7 +96,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
     wget -O /dbfs/hyperopt_lab/penguins.csv https://raw.githubusercontent.com/MicrosoftLearning/mslearn-databricks/main/data/penguins.csv
     ```
 
-1. 使用以下单元格右上角的“&#9656; 运行单元格”菜单选项来运行它****。 然后等待代码运行的 Spark 作业完成。
+1. 使用单元格左侧的“&#9656; 运行单元格”菜单选项来运行该代码****。 然后等待代码运行的 Spark 作业完成。
 1. 现在为机器学习准备数据。 在现有代码单元格下，使用 + 图标添加新的代码单元格****。 然后在新单元格中输入并运行以下代码，其用途为：
     - 删除任何不完整的行
     - 应用适当的数据类型
@@ -228,7 +228,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 ## 清理
 
-在 Azure Databricks 门户的“计算”页面上，选择你的群集，然后选择“&#9632; 终止”以将其关闭。********
+在 Azure Databricks 门户的“**计算**”页上，选择群集，然后选择“**&#9632; 终止**”以将其关闭。
 
 如果已完成对 Azure Databricks 的探索，则现在可以删除已创建的资源，以避免产生不必要的 Azure 成本并释放订阅中的容量。
 
