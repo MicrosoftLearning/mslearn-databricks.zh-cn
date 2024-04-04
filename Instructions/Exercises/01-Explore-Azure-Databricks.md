@@ -15,7 +15,7 @@ Azure Databricks 是基于 Microsoft Azure 的常用开源 Databricks 平台的�
 
 > **提示**：如果你已有 Azure Databricks 工作区，则可以跳过此过程并使用现有工作区。
 
-本练习包括一个用于预配新 Azure Databricks 工作区的脚本。 该脚本会尝试在一个区域中创建*高级*层 Azure Databricks 工作区资源，在该区域中，Azure 订阅具有本练习所需计算核心的充足配额；该脚本假设你的用户帐户在订阅中具有足够的权限来创建 Azure Databricks 工作区资源。 如果脚本由于配额或权限不足而失败，可以尝试在 Azure 门户中以交互方式创建 Azure Databricks 工作区。
+本练习包括一个用于预配新 Azure Databricks 工作区的脚本。 该脚本会尝试在一个区域中创建*高级*层 Azure Databricks 工作区资源，在该区域中，Azure 订阅具有本练习所需计算核心的充足配额；该脚本假设你的用户帐户在订阅中具有足够的权限来创建 Azure Databricks 工作区资源。 如果脚本由于配额或权限不足而失败，可以尝试 [在 Azure 门户中以交互方式创建 Azure Databricks 工作区](https://learn.microsoft.com/azure/databricks/getting-started/#--create-an-azure-databricks-workspace)。
 
 1. 在 Web 浏览器中，登录到 [Azure 门户](https://portal.azure.com)，网址为 `https://portal.azure.com`。
 2. 使用页面顶部搜索栏右侧的 [\>_] 按钮在 Azure 门户中创建新的 Cloud Shell，在出现提示时选择“PowerShell”环境并创建存储。 Cloud Shell 在 Azure 门户底部的窗格中提供命令行界面，如下所示：
@@ -76,7 +76,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 1. 将 [**products.csv**](https://raw.githubusercontent.com/MicrosoftLearning/mslearn-databricks/main/data/products.csv) 文件从 `https://raw.githubusercontent.com/MicrosoftLearning/mslearn-databricks/main/data/products.csv` 下载到本地计算机，并将其另存为 **products.csv**。
 1. 1. 在边栏的“**(+) 新建**”链接菜单中，选择“**文件上传**”。
 1. 上传下载到计算机的 **products.csv** 文件。
-1. 在“创建或修改文件上传中的表格”页中，确保选择页面右上角的群集。 然后选择 **hive_metastore** 目录及其默认架构以创建新的名为“**products**”的表格。
+1. 在“**创建或修改文件上传中的表格**”页中，确保选择页面右上角的群集。 然后选择 **hive_metastore** 目录及其默认架构以新建名为“**products**”的表格。
 1. 在创建**产品**页的“**目录资源管理器**”页中，在“**创建**”按钮菜单中，选择“**笔记本**”以创建笔记本。
 1. 在笔记本中，确保笔记本已连接到群集，然后查看已自动添加到第一个单元格的代码，应如下所示：
 
@@ -98,7 +98,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 ## 使用数据帧分析数据
 
-虽然大多数数据分析都熟练使用上一示例中使用的 SQL 代码，但部分数据分析师和数据科学家可以使用本机 Spark 对象（如编程语言中的数据帧，其中一个例子便是 PySpark，即 Python 的 Spark 优化版本）来有效处理数据。
+虽然大多数数据分析都熟练使用上一示例中使用的 SQL 代码，但部分数据分析师和数据科学家可以使用本机 Spark 对象（如编程语言中的*数据帧*，其中一个例子便是 *PySpark*，即 Python 的 Spark 优化版本）来有效处理数据。
 
 1. 在笔记本中，在先前运行的代码单元格的图表输出下，使用 **+** 图标添加新单元格。
 1. 在新单元格中，输入并运行以下代码：
