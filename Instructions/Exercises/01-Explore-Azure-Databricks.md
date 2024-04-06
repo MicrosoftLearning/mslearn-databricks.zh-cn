@@ -15,7 +15,7 @@ Azure Databricks 是基于 Microsoft Azure 的常用开源 Databricks 平台的�
 
 > **提示**：如果你已有 Azure Databricks 工作区，则可以跳过此过程并使用现有工作区。
 
-本练习包括一个用于预配新 Azure Databricks 工作区的脚本。 该脚本会尝试在一个区域中创建*高级*层 Azure Databricks 工作区资源，在该区域中，Azure 订阅具有本练习所需计算核心的充足配额；该脚本假设你的用户帐户在订阅中具有足够的权限来创建 Azure Databricks 工作区资源。 如果脚本由于配额或权限不足而失败，可以尝试在 Azure 门户中以交互方式创建 Azure Databricks 工作区。
+本练习包括一个用于预配新 Azure Databricks 工作区的脚本。 该脚本会尝试在一个区域中创建*高级*层 Azure Databricks 工作区资源，在该区域中，Azure 订阅具有本练习所需计算核心的充足配额；该脚本假设你的用户帐户在订阅中具有足够的权限来创建 Azure Databricks 工作区资源。 如果脚本由于配额或权限不足而失败，可以尝试 [在 Azure 门户中以交互方式创建 Azure Databricks 工作区](https://learn.microsoft.com/azure/databricks/getting-started/#--create-an-azure-databricks-workspace)。
 
 1. 在 Web 浏览器中，登录到 [Azure 门户](https://portal.azure.com)，网址为 `https://portal.azure.com`。
 2. 使用页面顶部搜索栏右侧的 [\>_] 按钮在 Azure 门户中创建新的 Cloud Shell，在出现提示时选择“PowerShell”环境并创建存储。 Cloud Shell 在 Azure 门户底部的窗格中提供命令行界面，如下所示：
@@ -63,43 +63,30 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
     - **Databricks 运行时版本**：13.3 LTS（Spark 3.4.1、Scala 2.12）或更高版本
     - 使用 Photon 加速：已选择
     - 节点类型：Standard_DS3_v2
-    - **在处于不活动状态** *20* **分钟后终止**
+    - 在处于不活动状态 20 分钟后终止**********
 
 1. 等待群集创建完成。 这可能需要一到两分钟时间。
 
 > 注意：如果群集无法启动，则订阅在预配 Azure Databricks 工作区的区域中的配额可能不足。 请参阅 [CPU 内核限制阻止创建群集](https://docs.microsoft.com/azure/databricks/kb/clusters/azure-core-limit)，了解详细信息。 如果发生这种情况，可以尝试删除工作区，并在其他区域创建新工作区。 可以将区域指定为设置脚本的参数，如下所示：`./mslearn-databricks/setup.ps1 eastus`
 
-## 使用 Spark 分析数据文件
+## 使用 Spark 分析数据
 
 与许多 Spark 环境一样，Databricks 支持使用笔记本来合并笔记和交互式代码单元格，可用于探索数据。
 
-1. 在边栏中，使用“(+) 新建”**** 链接创建**笔记本**。
-1. 将默认笔记本名称 (**Untitled Notebook *[date]***) 更改为“浏览产品”****，然后在“连接”**** 下拉列表中选择你的群集（如果尚未选择）。 如果群集未运行，可能需要一分钟左右才能启动。
-1. 将 [**products.csv**](https://raw.githubusercontent.com/MicrosoftLearning/mslearn-databricks/main/data/products.csv) 文件从 `https://raw.githubusercontent.com/MicrosoftLearning/mslearn-databricks/main/data/products.csv` 下载到本地计算机，并将其另存为 **products.csv**。 然后，在“Explore products”笔记本中的“文件”菜单上，选择“将数据上传到 DBFS”  。
-1. 在“上传数据”对话框中，记下要将文件上传到的“DBFS 目标目录”********。 然后选择“文件”区域，并将下载到计算机的 products.csv 文件上传 。 在上传该文件后，选择“下一步”
-1. 在“从笔记本访问文件”窗格中，选择示例 PySpark 代码并将其复制到剪贴板****。 你将使用该代码将文件中的数据加载到 DataFrame 中。 然后选择“完成”。
-1. 在“浏览产品”笔记本的空白代码单元格中，粘贴复制的代码，应如下所示****：
+1. 将 [**products.csv**](https://raw.githubusercontent.com/MicrosoftLearning/mslearn-databricks/main/data/products.csv) 文件从 `https://raw.githubusercontent.com/MicrosoftLearning/mslearn-databricks/main/data/products.csv` 下载到本地计算机，并将其另存为 **products.csv**。
+1. 1. 在边栏的“**(+) 新建**”链接菜单中，选择“**文件上传**”。
+1. 上传下载到计算机的 **products.csv** 文件。
+1. 在“**创建或修改文件上传中的表格**”页中，确保选择页面右上角的群集。 然后选择 **hive_metastore** 目录及其默认架构以新建名为“**products**”的表格。
+1. 在创建**产品**页的“**目录资源管理器**”页中，在“**创建**”按钮菜单中，选择“**笔记本**”以创建笔记本。
+1. 在笔记本中，确保笔记本已连接到群集，然后查看已自动添加到第一个单元格的代码，应如下所示：
 
     ```python
-    df1 = spark.read.format("csv").option("header", "true").load("dbfs:/FileStore/shared_uploads/user@outlook.com/products.csv")
+    %sql
+    SELECT * FROM `hive_metastore`.`default`.`products`;
     ```
 
-1. 使用单元格右上角的“&#9656; 运行单元格”菜单选项来运行该代码，启动并在出现提示时附加群集****。
-1. 等待代码运行的 Spark 作业完成。 代码根据已上传的文件中的数据创建了一个名为 df1 的 dataframe 对象******。
-1. 在现有代码单元格下，使用 + 图标添加新的代码单元格****。 然后在新单元格中，输入以下代码：
-
-    ```python
-   display(df1)
-    ```
-
-1. 使用右上角的“&#9656; 运行新的单元格”菜单选项来运行该代码****。 此代码显示 dataframe 的内容，其内容应如下所示：
-
-    | ProductID | ProductName | 类别 | ListPrice |
-    | -- | -- | -- | -- |
-    | 771 | Mountain-100 Silver, 38 | 山地自行车 | 3399.9900 |
-    | 772 | Mountain-100 Silver, 42 | 山地自行车 | 3399.9900 |
-    | ... | ... | ... | ... |
-
+1. 使用单元格左侧的“**&#9656; 运行单元格**”菜单选项来运行该代码，启动并在出现提示时附加群集。
+1. 等待代码运行的 Spark 作业完成。 该代码从基于上传文件创建的表格中检索数据。
 1. 在结果表上方，选择 +，然后选择“可视化效果”以查看可视化效果编辑器，然后应用以下选项********：
     - **可视化效果类型**：条形图
     - **X 列**：类别
@@ -109,29 +96,20 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
     ![按类别显示产品计数的条形图](./images/databricks-chart.png)
 
-## 创建表并进行查询
+## 使用数据帧分析数据
 
-虽然许多数据分析都习惯于使用 Python 或 Scala 等语言来处理文件中的数据，但许多数据分析解决方案都是建立在关系数据库之上的；其中数据存储在表中并使用 SQL 进行操作。
+虽然大多数数据分析都熟练使用上一示例中使用的 SQL 代码，但部分数据分析师和数据科学家可以使用本机 Spark 对象（如编程语言中的*数据帧*，其中一个例子便是 *PySpark*，即 Python 的 Spark 优化版本）来有效处理数据。
 
-1. 在“浏览产品”笔记本中，在先前运行的代码单元格的图表输出下，使用 + 图标添加新单元格********。
-2. 在新单元格中，输入并运行以下代码：
+1. 在笔记本中，在先前运行的代码单元格的图表输出下，使用 **+** 图标添加新单元格。
+1. 在新单元格中，输入并运行以下代码：
 
     ```python
-   df1.write.saveAsTable("products")
+    df = spark.sql("SELECT * FROM products")
+    df = df.filter("Category == 'Road Bikes'")
+    display(df)
     ```
 
-3. 单元格完成后，使用以下代码在其下添加新单元格：
-
-    ```sql
-   %sql
-
-   SELECT ProductName, ListPrice
-   FROM products
-   WHERE Category = 'Touring Bikes';
-    ```
-
-4. 运行新单元格，其中包含用于返回“旅行自行车”类别中产品名称和价格的 SQL 代码**。
-5. 在边栏中，选择“目录”**** 链接，并验证是否已在默认数据库架构（其名称一般为 **default**）中创建**产品**表。 可以使用 Spark 代码来创建自定义数据库架构和关系表架构，数据分析师可以使用它们来探索数据和生成分析报告。
+1. 运行新单元格，该单元格返回“*公路自行车*”类别中的产品。
 
 ## 清理
 

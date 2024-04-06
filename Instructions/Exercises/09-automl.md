@@ -17,7 +17,7 @@ AutoML 是 Azure Databricks 的一项功能，它会尝试将多种算法和参�
 
 > **注意**：就本练习来说，你需要一个**高级** Azure Databricks 工作区，该工作区位于某个支持*模型服务*的区域中。 有关区域 Azure Databricks 功能的详细信息，请参阅 [Azure Databricks 区域](https://learn.microsoft.com/azure/databricks/resources/supported-regions)。 如果你已在合适的区域拥有*高级*或*试用* Azure Databricks 工作区，则可以跳过此过程并使用现有工作区。
 
-本练习包括一个用于预配新 Azure Databricks 工作区的脚本。 该脚本会尝试在一个区域中创建*高级*层 Azure Databricks 工作区资源，在该区域中，Azure 订阅具有本练习所需计算核心的充足配额；该脚本假设你的用户帐户在订阅中具有足够的权限来创建 Azure Databricks 工作区资源。 如果脚本由于配额或权限不足而失败，可以尝试在 Azure 门户中以交互方式创建 Azure Databricks 工作区。
+本练习包括一个用于预配新 Azure Databricks 工作区的脚本。 该脚本会尝试在一个区域中创建*高级*层 Azure Databricks 工作区资源，在该区域中，Azure 订阅具有本练习所需计算核心的充足配额；该脚本假设你的用户帐户在订阅中具有足够的权限来创建 Azure Databricks 工作区资源。 如果脚本由于配额或权限不足而失败，可以尝试 [在 Azure 门户中以交互方式创建 Azure Databricks 工作区](https://learn.microsoft.com/azure/databricks/getting-started/#--create-an-azure-databricks-workspace)。
 
 1. 在 Web 浏览器中，登录到 [Azure 门户](https://portal.azure.com)，网址为 `https://portal.azure.com`。
 2. 使用页面顶部搜索栏右侧的 [\>_] 按钮在 Azure 门户中创建新的 Cloud Shell，在出现提示时选择“PowerShell”环境并创建存储。 Cloud Shell 在 Azure 门户底部的窗格中提供命令行界面，如下所示：
@@ -48,9 +48,9 @@ AutoML 是 Azure Databricks 的一项功能，它会尝试将多种算法和参�
 
 Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集在多个节点上并行处理数据。 每个群集由一个用于协调工作的驱动程序节点和多个用于执行处理任务的工作器节点组成。 在本练习中，将创建一个*单节点*群集，以最大程度地减少实验室环境中使用的计算资源（在实验室环境中，资源可能会受到限制）。 在生产环境中，通常会创建具有多个工作器节点的群集。
 
-> **提示**：如果 Azure Databricks 工作区中已有一个具有 13.3 LTS **<u>ML</u>** 或更高运行时版本的群集，则可以使用它来完成此练习并跳过此过程。
+> **提示**：如果 Azure Databricks 工作区中已有一个具有 13.3 LTS ML**<u></u>** 或更高运行时版本的群集，则可以使用它来完成此练习并跳过此过程。
 
-1. 在 Azure 门户中，浏览到已由脚本创建的 **msl-xxxxxxx*** 资源组（或包含现有 Azure Databricks 工作区的资源组）
+1. 在 Azure 门户中，浏览到已由脚本创建的 msl-xxxxxxx****** 资源组（或包含现有 Azure Databricks 工作区的资源组）
 1. 选择 Azure Databricks 服务资源（如果已使用安装脚本创建，则名为 **databricks-xxxxxxx***）。
 1. 在工作区的“概述”**** 页中，使用“启动工作区”**** 按钮在新的浏览器标签页中打开 Azure Databricks 工作区；请在出现提示时登录。
 
@@ -62,13 +62,13 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
     - **策略**：非受限
     - 群集模式：单节点
     - 访问模式：单用户（选择你的用户帐户）
-    - **Databricks 运行时版本**：*选择最新非 beta 版本运行时的 **<u>ML</u>** 版本（不是****标准运行时版本），该版本须符合以下条件：*
+    - Databricks Runtime 版本****：选择最新非 beta 版本运行时的 ML***<u></u>** 版本（不是****标准运行时版本），该版本符合以下条件：*
         - 不使用 GPU**
         - 包括 Scala > 2.11
         - *包括 Spark > **3.4***
-    - **使用 Photon 加速**：未选定<u></u>
+    - 使用 Photon 加速****：未选定<u></u>
     - 节点类型：Standard_DS3_v2
-    - **在处于不活动状态** *20* **分钟后终止**
+    - 在处于不活动状态 20 分钟后终止**********
 
 1. 等待群集创建完成。 这可能需要一到两分钟时间。
 

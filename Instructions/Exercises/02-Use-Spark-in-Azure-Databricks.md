@@ -13,7 +13,7 @@ Azure Databricks 是基于 Microsoft Azure 的常用开源 Databricks 平台的�
 
 > **提示**：如果你已有 Azure Databricks 工作区，则可以跳过此过程并使用现有工作区。
 
-本练习包括一个用于预配新 Azure Databricks 工作区的脚本。 该脚本会尝试在一个区域中创建*高级*层 Azure Databricks 工作区资源，在该区域中，Azure 订阅具有本练习所需计算核心的充足配额；该脚本假设你的用户帐户在订阅中具有足够的权限来创建 Azure Databricks 工作区资源。 如果脚本由于配额或权限不足而失败，可以尝试在 Azure 门户中以交互方式创建 Azure Databricks 工作区。
+本练习包括一个用于预配新 Azure Databricks 工作区的脚本。 该脚本会尝试在一个区域中创建*高级*层 Azure Databricks 工作区资源，在该区域中，Azure 订阅具有本练习所需计算核心的充足配额；该脚本假设你的用户帐户在订阅中具有足够的权限来创建 Azure Databricks 工作区资源。 如果脚本由于配额或权限不足而失败，可以尝试 [在 Azure 门户中以交互方式创建 Azure Databricks 工作区](https://learn.microsoft.com/azure/databricks/getting-started/#--create-an-azure-databricks-workspace)。
 
 1. 在 Web 浏览器中，登录到 [Azure 门户](https://portal.azure.com)，网址为 `https://portal.azure.com`。
 2. 使用页面顶部搜索栏右侧的 [\>_] 按钮在 Azure 门户中创建新的 Cloud Shell，在出现提示时选择“PowerShell”环境并创建存储。 Cloud Shell 在 Azure 门户底部的窗格中提供命令行界面，如下所示：
@@ -61,7 +61,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
     - **Databricks 运行时版本**：13.3 LTS（Spark 3.4.1、Scala 2.12）或更高版本
     - 使用 Photon 加速：已选择
     - 节点类型：Standard_DS3_v2
-    - **在处于不活动状态** *20* **分钟后终止**
+    - 在处于不活动状态 20 分钟后终止**********
 
 1. 等待群集创建完成。 这可能需要一到两分钟时间。
 
@@ -78,7 +78,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 ### 引入数据
 
-1. 在笔记本的第一个单元格中输入以下代码，该代码使用 *shell* 命令从 GitHub 将数据文件下载到群集使用的 Databricks 文件系统 (DBFS) 中。
+1. 在笔记本的第一个单元格中输入以下代码，该代码使用 shell 命令将数据文件从 GitHub 下载到群集使用的文件系统中。**
 
     ```python
     %sh
@@ -89,7 +89,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
     wget -O /dbfs/spark_lab/2021.csv https://raw.githubusercontent.com/MicrosoftLearning/mslearn-databricks/main/data/2021.csv
     ```
 
-1. 使用以下单元格右上角的“**&#9656; 运行单元格**”菜单选项来运行它。 然后等待代码运行的 Spark 作业完成。
+1. 使用单元格左侧的“&#9656; 运行单元格”菜单选项来运行该代码****。 然后等待代码运行的 Spark 作业完成。
 
 ### 查询文件中的数据
 
