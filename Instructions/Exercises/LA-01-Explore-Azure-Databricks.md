@@ -9,7 +9,7 @@ Azure Databricks 是基于 Microsoft Azure 的常用开源 Databricks 平台的�
 
 与 Azure Synapse Analytics 类似，Azure Databricks 工作区提供了一个中心点，用于管理 Azure 上的 Databricks 群集、数据和资源**。
 
-完成此练习大约需要 30 分钟。
+完成此练习大约需要 **20** 分钟。
 
 ## 预配 Azure Databricks 工作区
 
