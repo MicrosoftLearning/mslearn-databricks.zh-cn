@@ -13,5 +13,5 @@ layout: home
 
 需要一个你在其中具有管理权限的 Azure 订阅才能完成这些练习。
 
-{% assign exercises = site.pages | where_exp:"page", "page.url contains '/Instructions/Exercises'" %} {% for activity in exercises  %}
+{% assign exercises = site.pages | where_exp:"page", "page.url contains '/Instructions'" %} {% for activity in exercises  %}
 - [{{ activity.lab.title }}]({{ site.github.url }}{{ activity.url }}) | {% endfor %}

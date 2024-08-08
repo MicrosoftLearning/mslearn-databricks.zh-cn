@@ -1,9 +1,9 @@
 ---
 lab:
-  title: 使用 Azure Databricks 和 Azure DevOps 或 Azure Databricks 和 GitHub 实现 CI/CD 管道
+  title: 使用 Azure Databricks 实现 CI/CD 工作流
 ---
 
-# 使用 Azure Databricks 和 Azure DevOps 或 Azure Databricks 和 GitHub 实现 CI/CD 管道
+# 使用 Azure Databricks 实现 CI/CD 工作流
 
 使用 Azure Databricks 和 Azure DevOps 或 Azure Databricks 和 GitHub 实现持续集成 (CI) 和持续部署 (CD) 管道涉及设置一系列自动化步骤，以确保高效集成、测试和部署代码更改。 此过程通常包括连接到 Git 存储库、使用 Azure Pipelines 运行生成的作业和单元测试代码，以及部署要在 Databricks 笔记本中使用的生成项目。 此工作流支持可靠的开发周期，从而实现符合现代 DevOps 实践的持续集成和交付。
 
@@ -143,17 +143,22 @@ steps:
   displayName: 'Install Databricks CLI'
 
 - script: |
-    databricks fs cp dbfs:/FileStore/sample_sales.csv .
-  displayName: 'Download Sample Data from DBFS'
+    databricks configure --token <<EOF
+    <your-databricks-host>
+    <your-databricks-token>
+    EOF
+  displayName: 'Configure Databricks CLI'
 
 - script: |
-    python -m unittest discover -s tests
-  displayName: 'Run Unit Tests'
+    databricks fs cp dbfs:/FileStore/sample_sales.csv . --overwrite
+  displayName: 'Download Sample Data from DBFS'
 ```
 
-4. 选择**保存并运行**。
+4. 将 `<your-databricks-host>` 和 `<your-databricks-token>` 替换为实际的 Databricks 主机 URL 和令牌。 这会在尝试使用 Databricks CLI 之前对其进行配置。
 
-此 YAML 文件将设置一个 CI 管道，该管道由存储库 `main` 分支的更改而触发。 管道设置 Python 环境，安装 Databricks CLI，从 Databricks 工作区下载示例数据并运行 Python 单元测试。 这是 CI 工作流的常见设置。
+5. 选择**保存并运行**。
+
+此 YAML 文件将设置一个 CI 管道，该管道由存储库 `main` 分支的更改而触发。 管道设置 Python 环境，安装 Databricks CLI，从 Databricks 工作区下载示例数据。 这是 CI 工作流的常见设置。
 
 ## 配置 CD 管道
 
@@ -179,6 +184,13 @@ stages:
     - script: |
         pip install databricks-cli
       displayName: 'Install Databricks CLI'
+
+    - script: |
+        databricks configure --token <<EOF
+        <your-databricks-host>
+        <your-databricks-token>
+        EOF
+      displayName: 'Configure Databricks CLI'
 
     - script: |
         databricks workspace import_dir /path/to/notebooks /Workspace/Notebooks
