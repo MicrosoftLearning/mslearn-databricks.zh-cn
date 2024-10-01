@@ -21,7 +21,7 @@ Azure Databricks Workflows 提供了一个可靠的平台，用于高效部署�
 
     ![具有 Cloud Shell 窗格的 Azure 门户](./images/cloud-shell.png)
 
-    > 注意：如果以前创建了使用 Bash 环境的 Cloud shell，请使用 Cloud Shell 窗格左上角的下拉菜单将其更改为“PowerShell”。
+    > **注意**：如果以前创建了使用 Bash 环境的 Cloud Shell，请使用 Cloud Shell 窗格左上角的下拉菜单将其更改为 PowerShell********。
 
 3. 请注意，可以通过拖动窗格顶部的分隔条或使用窗格右上角的 &#8212;、&#9723; 或 X 图标来调整 Cloud Shell 的大小，以最小化、最大化和关闭窗格  。 有关如何使用 Azure Cloud Shell 的详细信息，请参阅 [Azure Cloud Shell 文档](https://docs.microsoft.com/azure/cloud-shell/overview)。
 
@@ -65,7 +65,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
     - 访问模式：单用户（选择你的用户帐户）
     - **Databricks 运行时版本**：13.3 LTS（Spark 3.4.1、Scala 2.12）或更高版本
     - 使用 Photon 加速：已选择
-    - 节点类型：Standard_DS3_v2
+    - **节点类型**：Standard_D4ds_v5
     - 在处于不活动状态 20 分钟后终止**********
 
 1. 等待群集创建完成。 这可能需要一到两分钟时间。
@@ -97,7 +97,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 1. 在边栏中，使用“(+) 新建”**** 链接创建**笔记本**。
 
-2. 将默认笔记本名称（**无标题笔记本*[日期]***）更改为“ETL 任务”****，然后在“连接”**** 下拉列表中选择群集（如果尚未选择）。 如果群集未运行，可能需要一分钟左右才能启动。
+2. 将默认笔记本名称 (**Untitled Notebook *[date]***) 更改为 `ETL task`，然后在“**连接**”下拉列表中选择群集（如果尚未选择）。 如果群集未运行，可能需要一分钟左右才能启动。
 
 3. 在笔记本的第一个单元中，输入以下代码，该代码定义数据的架构并在数据帧中加载数据集：
 
@@ -127,7 +127,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
     df = df.withColumn('Tax', col('UnitPrice') * 0.08)
     df = df.withColumn('Tax', col('Tax').cast("float"))
      ```
-> 备注：更新“Tax”**** 列中的值后，其数据类型将再次设置为 `float`。 这是因为其数据类型在执行计算后更改为 `double`。 由于 `double` 内存使用量高于 `float`，因此为了提高性能，最好将列类型转换回 `float`。
+    > **备注**：更新“**税款**”列中的值后，其数据类型将再次设置为 `float`。 这是因为其数据类型在执行计算后更改为 `double`。 由于 `double` 内存使用量高于 `float`，因此为了提高性能，最好将列类型转换回 `float`。
 
 5. 在新代码单元格中，运行以下代码以聚合和分组订单数据：
 
@@ -156,7 +156,7 @@ Azure Databricks 可管理所有作业的任务业务流程、群集管理、监
 
 2. 在“工作流”窗格中，选择“创建作业”****。
 
-3. 将默认作业名称（**新建作业*[日期]***）更改为“ETL 作业”****。
+3. 将默认作业名称 (**New job *[date]***) 更改为 `ETL job`。
 
 4. 在“任务名称”**** 字段中输入任务的名称。
 

@@ -67,7 +67,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
         - 包括 Scala > 2.11
         - *包括 Spark > **3.4***
     - 使用 Photon 加速****：未选定<u></u>
-    - 节点类型：Standard_DS3_v2
+    - **节点类型**：Standard_D4ds_v5
     - 在处于不活动状态 20 分钟后终止**********
 
 1. 等待群集创建完成。 这可能需要一到两分钟时间。
@@ -405,91 +405,6 @@ PyTorch 利用*数据加载程序*分批加载训练和验证数据。 我们已
    
    print('Prediction:',predicted.item())
     ```
-
-## 使用 Horovod 进行分布式训练
-
-之前的模型训练是在群集的单个节点上执行的。 实际上，最好在单个计算机上跨多个 CPU（或最好是 GPU）缩放深度学习模型训练，但在某些情况下，需要通过多层深度学习模型传递大量训练数据，则可以通过跨多个群集节点分配训练工作来实现一些效率。
-
-Horovod 是一个开源库，可用于在 Spark 群集中的多个节点上分配深度学习训练，就像在 Azure Databricks 工作区中预配的那样。
-
-### 创建训练函数
-
-若要使用 Horovod，需封装代码以配置训练设置并在新函数中调用**训练**函数，你将使用 **HorovodRunner** 类来运行它，从而跨多个节点分配执行。 在训练包装器函数中，可以使用各种 Horovod 类来定义分布式数据加载程序，以便每个节点都可以处理整个数据集的子集），将模型权重和优化器的初始状态广播到所有节点，确定正在使用的节点数，以及代码正在哪个节点上运行。
-
-1. 运行以下代码以创建使用 Horovod 训练模型的函数：
-
-    ```python
-   import horovod.torch as hvd
-   from sparkdl import HorovodRunner
-   
-   def train_hvd(model):
-       from torch.utils.data.distributed import DistributedSampler
-       
-       hvd.init()
-       
-       device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-       if device.type == 'cuda':
-           # Pin GPU to local rank
-           torch.cuda.set_device(hvd.local_rank())
-       
-       # Configure the sampler so that each worker gets a distinct sample of the input dataset
-       train_sampler = DistributedSampler(train_ds, num_replicas=hvd.size(), rank=hvd.rank())
-       # Use train_sampler to load a different sample of data on each worker
-       train_loader = torch.utils.data.DataLoader(train_ds, batch_size=20, sampler=train_sampler)
-       
-       # The effective batch size in synchronous distributed training is scaled by the number of workers
-       # Increase learning_rate to compensate for the increased batch size
-       learning_rate = 0.001 * hvd.size()
-       optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-       
-       # Wrap the local optimizer with hvd.DistributedOptimizer so that Horovod handles the distributed optimization
-       optimizer = hvd.DistributedOptimizer(optimizer, named_parameters=model.named_parameters())
-   
-       # Broadcast initial parameters so all workers start with the same parameters
-       hvd.broadcast_parameters(model.state_dict(), root_rank=0)
-       hvd.broadcast_optimizer_state(optimizer, root_rank=0)
-   
-       optimizer.zero_grad()
-   
-       # Train over 50 epochs
-       epochs = 100
-       for epoch in range(1, epochs + 1):
-           print('Epoch: {}'.format(epoch))
-           # Feed training data into the model to optimize the weights
-           train_loss = train(model, train_loader, optimizer)
-   
-       # Save the model weights
-       if hvd.rank() == 0:
-           model_file = '/dbfs/penguin_classifier_hvd.pt'
-           torch.save(model.state_dict(), model_file)
-           print('model saved as', model_file)
-    ```
-
-1. 使用以下代码从 **HorovodRunner** 对象调用函数：
-
-    ```python
-   # Reset random seed for PyTorch
-   torch.manual_seed(0)
-   
-   # Create a new model
-   new_model = PenguinNet()
-   
-   # We'll use CrossEntropyLoss to optimize a multiclass classifier
-   loss_criteria = nn.CrossEntropyLoss()
-   
-   # Run the distributed training function on 2 nodes
-   hr = HorovodRunner(np=2, driver_log_verbosity='all') 
-   hr.run(train_hvd, model=new_model)
-   
-   # Load the trained weights and test the model
-   test_model = PenguinNet()
-   test_model.load_state_dict(torch.load('/dbfs/penguin_classifier_hvd.pt'))
-   test_loss = test(test_model, test_loader)
-    ```
-
-可能需要滚动以查看所有输出，它应显示 Horovod 的一些信息性消息，后跟节点的日志输出（因为 **driver_log_verbosity** 参数设置为 **all**）。 节点输出应显示每个纪元之后的损失。 最后，**测试**函数用于测试训练后的模型。
-
-> **提示**：如果损失在每个纪元后不会减少，请尝试再次运行单元！
 
 ## 清理
 

@@ -22,7 +22,7 @@ Azure Databricks 是基于 Microsoft Azure 的常用开源 Databricks 平台的�
 
     ![具有 Cloud Shell 窗格的 Azure 门户](./images/cloud-shell.png)
 
-    > 注意：如果以前创建了使用 Bash 环境的 Cloud shell，请使用 Cloud Shell 窗格左上角的下拉菜单将其更改为“PowerShell”。
+    > **注意**：如果以前创建了使用 Bash 环境的 Cloud Shell，请使用 Cloud Shell 窗格左上角的下拉菜单将其更改为 PowerShell********。
 
 3. 请注意，可以通过拖动窗格顶部的分隔条或使用窗格右上角的 &#8212;、&#9723; 或 X 图标来调整 Cloud Shell 的大小，以最小化、最大化和关闭窗格  。 有关如何使用 Azure Cloud Shell 的详细信息，请参阅 [Azure Cloud Shell 文档](https://docs.microsoft.com/azure/cloud-shell/overview)。
 
@@ -62,7 +62,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
     - 访问模式：单用户（选择你的用户帐户）
     - **Databricks 运行时版本**：13.3 LTS（Spark 3.4.1、Scala 2.12）或更高版本
     - 使用 Photon 加速：已选择
-    - 节点类型：Standard_DS3_v2
+    - **节点类型**：Standard_D4ds_v5
     - 在处于不活动状态 20 分钟后终止**********
 
 1. 等待群集创建完成。 这可能需要一到两分钟时间。
@@ -74,8 +74,8 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 与许多 Spark 环境一样，Databricks 支持使用笔记本来合并笔记和交互式代码单元格，可用于探索数据。
 
 1. 将 [**products.csv**](https://raw.githubusercontent.com/MicrosoftLearning/mslearn-databricks/main/data/products.csv) 文件从 `https://raw.githubusercontent.com/MicrosoftLearning/mslearn-databricks/main/data/products.csv` 下载到本地计算机，并将其另存为 **products.csv**。
-1. 在边栏的“**(+) 新建**”链接菜单中，选择“**文件上传**”。
-1. 上传下载到计算机的 **products.csv** 文件。
+1. 在边栏的“**(+) 新建**”链接菜单中，选择“**数据**”。
+1. 选择“**创建或修改表**”，并将下载的 **products.csv** 文件上传到计算机。
 1. 在“**创建或修改文件上传中的表格**”页中，确保选择页面右上角的群集。 然后选择 **hive_metastore** 目录及其默认架构以新建名为“**products**”的表格。
 1. 在创建**产品**页的“**目录资源管理器**”页中，在“**创建**”按钮菜单中，选择“**笔记本**”以创建笔记本。
 1. 在笔记本中，确保笔记本已连接到群集，然后查看已自动添加到第一个单元格的代码，应如下所示：
@@ -98,7 +98,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 ## 使用数据帧分析数据
 
-虽然大多数数据分析都熟练使用上一示例中使用的 SQL 代码，但部分数据分析师和数据科学家可以使用本机 Spark 对象（如编程语言中的*数据帧*，其中一个例子便是 *PySpark*，即 Python 的 Spark 优化版本）来有效处理数据。
+虽然大多数数据分析师都能熟练使用上一示例中使用的 SQL 代码，但部分数据分析师和数据科学家可以在 *PySpark*（Python 的 Spark 优化版本）等编程语言中使用本机 Spark 对象（如*数据帧*）来高效处理数据。
 
 1. 在笔记本中，在先前运行的代码单元格的图表输出下，使用 **+** 图标添加新单元格。
 1. 在新单元格中，输入并运行以下代码：
