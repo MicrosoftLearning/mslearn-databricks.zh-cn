@@ -1,72 +1,157 @@
-# 练习 07 - 使用 Azure Databricks 实现 LLMOps
+---
+lab:
+  title: 使用 Azure Databricks 实现 LLMOps
+---
 
-## 目标
-本练习将指导你完成使用 Azure Databricks 实现大型语言模型操作 (LLMOps) 的过程。 在本实验室结束时，你将了解如何使用最佳做法在生产环境中管理、部署和监视大型语言模型 (LLM)。
+# 使用 Azure Databricks 实现 LLMOps
 
-## 要求
-一个有效的 Azure 订阅。 如果没有该帐户，可以注册[免费试用版](https://azure.microsoft.com/en-us/free/)。
+Azure Databricks 提供了一个统一的平台，可简化从数据准备到模型服务和监控的 AI 生命周期，从而优化机器学习系统的性能和效率。 它支持生成式 AI 应用程序的开发，利用 Unity Catalog（用于数据管理）、MLflow（用于模型跟踪）和 Mosaic AI 模型服务（用于部署 LLM）等功能。
 
-## 步骤 1：预配 Azure Databricks
-- 登录到 Azure 门户
-    1. 转到 Azure 门户，然后使用凭据登录。
-- 创建 Databricks 服务：
-    1. 导航到“创建资源”>“分析”>“Azure Databricks”。
-    2. 输入所需的详细信息，例如工作区名称、订阅、资源组（新建或选择现有），以及位置。
-    3. 选择定价层（为此实验室选择标准定价层）。
-    4. 单击“查看 + 创建”，然后在通过验证后单击“创建”。
+完成本实验室大约需要 20 分钟。
 
-## 步骤 2：启动工作区并创建群集
-- 启动 Databricks 工作区
-    1. 部署完成后，转到资源并单击“启动工作区”。
-- 创建 Spark 群集：
-    1. 在 Databricks 工作区中，单击边栏上的“计算”，然后单击“创建计算”。
-    2. 指定群集名称并选择 Spark 的运行时版本。
-    3. 根据可用选项选择将辅助角色类型作为“标准”和节点类型（选择较小的节点以提高成本效益）。
-    4. 单击“创建计算”。
+## 开始之前
 
-- 安装所需的库
-    1. 群集运行后，导航到“库”选项卡。
-    2. 安装以下库：
-        - azure-ai-openai（用于连接到 Azure OpenAI）
-        - mlflow（用于模型管理）
-        - scikit-learn（如果需要进行其他模型评估）
+需要一个你在其中具有管理级权限的 [Azure 订阅](https://azure.microsoft.com/free)。
 
-## 步骤 3：模型管理
-- 上传或访问 LLM
-    1. 如果有经过训练的模型，请将其上传到 Databricks 文件系统 (DBFS)，或使用 Azure OpenAI 访问预先训练的模型。
-    2. 如果使用 Azure OpenAI
+## 预配 Azure OpenAI 资源
 
-    ```python
+如果还没有 Azure OpenAI 资源，请在 Azure 订阅中预配 Azure OpenAI 资源。
+
+1. 登录到 Azure 门户，地址为 ****。
+2. 请使用以下设置创建 Azure OpenAI 资源：
+    - 订阅****：*选择已被批准访问 Azure OpenAI 服务的 Azure 订阅*
+    - **资源组**：*创建或选择资源组*
+    - 区域****：从以下任何区域中进行随机选择******\*
+        - 美国东部 2
+        - 美国中北部
+        - 瑞典中部
+        - 瑞士西部
+    - **名称**：所选项的唯一名称**
+    - **定价层**：标准版 S0
+
+> \* Azure OpenAI 资源受区域配额约束。 列出的区域包括本练习中使用的模型类型的默认配额。 在与其他用户共享订阅的情况下，随机选择一个区域可以降低单个区域达到配额限制的风险。 如果稍后在练习中达到配额限制，你可能需要在不同的区域中创建另一个资源。
+
+3. 等待部署完成。 然后在 Azure 门户中转至部署的 Azure OpenAI 资源。
+
+4. 在左窗格的“**资源管理**”下，选择“**密钥和终结点**”。
+
+5. 复制终结点和其中一个可用密钥，因为稍后将在本练习中使用它。
+
+## 部署所需的模块
+
+Azure 提供了一个名为 **Azure AI Studio** 的基于 Web 的门户，可用于部署、管理和探索模型。 你将通过使用 Azure OpenAI Studio 部署模型，开始探索 Azure OpenAI。
+
+> **备注**：使用 Azure AI Studio 时，可能会显示建议你执行任务的消息框。 可以关闭这些消息框并按照本练习中的步骤进行操作。
+
+1. 在 Azure 门户中的 Azure OpenAI 资源的“**概述**”页上，向下滚动到“**开始**”部分，然后选择转到 **Azure AI Studio** 的按钮。
+   
+1. 在 Azure AI Studio 的左侧窗格中，选择“**部署**”页并查看现有模型部署。 如果没有模型部署，请使用以下设置创建新的 **gpt-35-turbo** 模型部署：
+    - **部署名称**：*gpt-35-turbo*
+    - 模型：gpt-35-turbo
+    - **模型版本**：默认
+    - **部署类型**：标准
+    - **每分钟令牌速率限制**：5K\*
+    - **内容筛选器**：默认
+    - **启用动态配额**：已禁用
+    
+> \*每分钟 5,000 个令牌的速率限制足以完成此练习，同时也为使用同一订阅的其他人留出容量。
+
+## 预配 Azure Databricks 工作区
+
+> **提示**：如果你已有 Azure Databricks 工作区，则可以跳过此过程并使用现有工作区。
+
+1. 登录到 Azure 门户，地址为 ****。
+2. 请使用以下设置创建 **Azure Databricks** 资源：
+    - **订阅**：*选择用于创建 Azure OpenAI 资源的同一 Azure 订阅*
+    - **资源组**：*在其中创建了 Azure OpenAI 资源的同一资源组*
+    - **区域**：*在其中创建 Azure OpenAI 资源的同一区域*
+    - **名称**：所选项的唯一名称**
+    - **定价层**：*高级*或*试用版*
+
+3. 选择“**查看 + 创建**”，然后等待部署完成。 然后转到资源并启动工作区。
+
+## 创建群集
+
+Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集在多个节点上并行处理数据。 每个群集由一个用于协调工作的驱动程序节点和多个用于执行处理任务的工作器节点组成。 在本练习中，将创建一个*单节点*群集，以最大程度地减少实验室环境中使用的计算资源（在实验室环境中，资源可能会受到限制）。 在生产环境中，通常会创建具有多个工作器节点的群集。
+
+> **提示**：如果 Azure Databricks 工作区中已有一个具有 13.3 LTS ML**<u></u>** 或更高运行时版本的群集，则可以使用它来完成此练习并跳过此过程。
+
+1. 在Azure 门户中，浏览到创建 Azure Databricks 工作区的资源组。
+2. 单击 Azure Databricks 服务资源。
+3. 在工作区的“概述”**** 页中，使用“启动工作区”**** 按钮在新的浏览器标签页中打开 Azure Databricks 工作区；请在出现提示时登录。
+
+> 提示：使用 Databricks 工作区门户时，可能会显示各种提示和通知。 消除这些内容，并按照提供的说明完成本练习中的任务。
+
+4. 在左侧边栏中，选择“**(+) 新建**”任务，然后选择“**群集**”。
+5. 在“新建群集”页中，使用以下设置创建新群集：
+    - 群集名称：用户名的群集（默认群集名称）
+    - **策略**：非受限
+    - 群集模式：单节点
+    - 访问模式：单用户（选择你的用户帐户）
+    - Databricks Runtime 版本****：选择最新非 beta 版本运行时的 ML***<u></u>** 版本（不是****标准运行时版本），该版本符合以下条件：*
+        - 不使用 GPU**
+        - 包括 Scala > 2.11
+        - *包括 Spark > **3.4***
+    - 使用 Photon 加速****：未选定<u></u>
+    - **节点类型**：Standard_D4ds_v5
+    - 在处于不活动状态 20 分钟后终止**********
+
+6. 等待群集创建完成。 这可能需要一到两分钟时间。
+
+> 注意：如果群集无法启动，则订阅在预配 Azure Databricks 工作区的区域中的配额可能不足。 请参阅 [CPU 内核限制阻止创建群集](https://docs.microsoft.com/azure/databricks/kb/clusters/azure-core-limit)，了解详细信息。 如果发生这种情况，可以尝试删除工作区，并在其他区域创建新工作区。
+
+## 安装所需的库
+
+1. 在 Databricks 工作区中，转到“工作区”**** 部分。
+
+2. 选择“创建”****，然后选择“笔记本”****。
+
+3. 为笔记本命名，然后选择“`Python`”作为语言。
+
+4. 在第一个代码单元格中，输入并运行以下代码以安装所需的库：
+   
+     ```python
+    %pip install azure-ai-openai flask
+     ```
+
+5. 安装完成后，在新单元格中重启内核：
+
+     ```python
+    %restart_python
+     ```
+
+## 使用 MLflow 记录 LLM
+
+1. 在新单元格中，运行以下代码来初始化 Azure OpenAI 客户端：
+
+     ```python
     from azure.ai.openai import OpenAIClient
 
     client = OpenAIClient(api_key="<Your_API_Key>")
     model = client.get_model("gpt-3.5-turbo")
+     ```
 
-    ```
-- 使用 MLflow 对模型进行版本控制
-    1. 初始化 MLflow 跟踪
+1. 在新单元格中，运行以下代码来初始化 MLflow 跟踪：     
 
-    ```python
+     ```python
     import mlflow
 
     mlflow.set_tracking_uri("databricks")
     mlflow.start_run()
-    ```
+     ```
 
-- 记录模型
+1. 在新单元格中，运行以下代码来记录模型：
 
-```python
-mlflow.pyfunc.log_model("model", python_model=model)
-mlflow.end_run()
+     ```python
+    mlflow.pyfunc.log_model("model", python_model=model)
+    mlflow.end_run()
+     ```
 
-```
+## 部署模型
 
-## 步骤 4：模型部署
-- 为模型创建 REST API
-    1. 为 API 创建 Databricks 笔记本。
-    2. 使用 Flask 或 FastAPI 定义 API 终结点
+1. 创建新笔记本并在第一个单元格中运行以下代码，从而为模型创建 REST API：
 
-    ```python
+     ```python
     from flask import Flask, request, jsonify
     import mlflow.pyfunc
 
@@ -81,44 +166,41 @@ mlflow.end_run()
 
     if __name__ == '__main__':
         app.run(host='0.0.0.0', port=5000)
-    ```
-- 保存并运行此笔记本以启动 API。
+     ```
 
-## 步骤 5：模型监视
-- 使用 MLflow 设置日志记录和监视
-    1. 在笔记本中启用 MLflow 自动记录
+## 监视模型
 
-    ```python
+1. 在第一个笔记本中，创建新单元格并运行以下代码来启用 MLflow 自动记录：
+
+     ```python
     mlflow.autolog()
-    ```
+     ```
 
-    2. 跟踪预测和输入数据。
+1. 在新单元格中，运行以下代码来跟踪预测和输入数据。
 
-    ```python
+     ```python
     mlflow.log_param("input", data["input"])
     mlflow.log_metric("prediction", prediction)
-    ```
+     ```
 
-- 实现模型偏移或性能问题的警报
-    1. 使用 Azure Databricks 或 Azure Monitor 设置针对模型性能重大更改的警报。
+1. 在新单元格中，运行以下代码来监控数据偏移：
 
-## 步骤 6：模型重新训练和自动化
-- 设置自动重新训练管道
-    1. 新建用于重新训练的 Databricks 笔记本。
-    2. 使用 Databricks 作业或 Azure 数据工厂计划重新训练作业。
-    3. 根据数据偏移或时间间隔自动执行重新训练过程。
+     ```python
+    import pandas as pd
+    from evidently.dashboard import Dashboard
+    from evidently.tabs import DataDriftTab
 
-- 自动部署重新训练的模型
-    1. 使用 MLflow 的 model_registry 自动更新已部署的模型。
-    2. 使用与步骤 3 中相同的过程部署重新训练的模型。
+    report = Dashboard(tabs=[DataDriftTab()])
+    report.calculate(reference_data=historical_data, current_data=current_data)
+    report.show()
+     ```
 
-## 步骤 7：负责任的 AI 做法
-- 集成偏差检测和缓解
-    1. 使用 Azure 的 Fairlearn 或自定义脚本评估模型偏差。
-    2. 使用 MLflow 实现缓解策略并记录结果。
+开始监控模型后，可以根据数据偏移检测设置自动重新训练管道。
 
-- 实现 LLM 部署的道德准则
-    1. 记录输入数据和预测，确保模型预测的透明度。
-    2. 建立模型使用指南，并确保符合道德标准。
+## 清理
 
-本练习提供了使用 Azure Databricks 实现 LLMOps 的综合指南，涵盖模型管理、部署、监视、重新训练和负责任的 AI 做法。 执行以下步骤将有助于在生产环境中高效管理和运行 LLM。    
+使用完 Azure OpenAI 资源后，请记得在位于 `https://portal.azure.com` 的 **Azure 门户** 中删除部署或整个资源。
+
+在 Azure Databricks 门户的“**计算**”页上，选择群集，然后选择“**&#9632; 终止**”以将其关闭。
+
+如果已完成对 Azure Databricks 的探索，则可以删除已创建的资源，以避免产生不必要的 Azure 成本并释放订阅中的容量。

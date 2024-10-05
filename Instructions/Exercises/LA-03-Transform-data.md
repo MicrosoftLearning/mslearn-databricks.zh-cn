@@ -24,7 +24,7 @@ Azure Databricks 中的常见数据转换任务包括数据清理、执行聚合
 
     ![具有 Cloud Shell 窗格的 Azure 门户](./images/cloud-shell.png)
 
-    > 注意：如果以前创建了使用 Bash 环境的 Cloud shell，请使用 Cloud Shell 窗格左上角的下拉菜单将其更改为“PowerShell”。
+    > **注意**：如果以前创建了使用 Bash 环境的 Cloud Shell，请使用 Cloud Shell 窗格左上角的下拉菜单将其更改为 PowerShell********。
 
 3. 请注意，可以通过拖动窗格顶部的分隔条或使用窗格右上角的 &#8212;、&#9723; 或 X 图标来调整 Cloud Shell 的大小，以最小化、最大化和关闭窗格  。 有关如何使用 Azure Cloud Shell 的详细信息，请参阅 [Azure Cloud Shell 文档](https://docs.microsoft.com/azure/cloud-shell/overview)。
 
@@ -64,7 +64,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
     - 访问模式：单用户（选择你的用户帐户）
     - **Databricks 运行时版本**：13.3 LTS（Spark 3.4.1、Scala 2.12）或更高版本
     - 使用 Photon 加速：已选择
-    - 节点类型：Standard_DS3_v2
+    - **节点类型**：Standard_D4ds_v5
     - 在处于不活动状态 20 分钟后终止**********
 
 6. 等待群集创建完成。 这可能需要一到两分钟时间。
@@ -75,7 +75,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 1. 在边栏中，使用“(+) 新建”**** 链接创建**笔记本**。
 
-2. 将默认笔记本名称（**无标题笔记本*[日期]***）更改为**使用 Spark 转换数据**，然后在**连接**下拉列表中选择群集（如果尚未选择）。 如果群集未运行，可能需要一分钟左右才能启动。
+2. 将默认笔记本名称 (**Untitled Notebook *[date]***) 更改为 `Transform data with Spark`，然后在“**连接**”下拉列表中选择群集（如果尚未选择）。 如果群集未运行，可能需要一分钟左右才能启动。
 
 ## 引入数据
 
@@ -186,7 +186,15 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 1. 虽然能够将 SQL 语句嵌入到包含 PySpark 代码的单元格中非常有用，但数据分析师通常只想要直接在 SQL 中工作。 添加一个新代码单元格并使用它运行以下代码。
 
-    ```sql
+    ```python
+   df.createOrReplaceTempView("salesorders")
+    ```
+
+此代码行将创建一个临时视图，然后可以直接与 SQL 语句一起使用。
+
+2. 在新单元格中，运行以下代码：
+   
+    ```python
    %sql
     
    SELECT YEAR(OrderDate) AS OrderYear,
@@ -198,7 +206,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
     观察以下情况：
     
-    - 单元格开头的 ``%sql` 行（名为 magic）指示应使用 Spark SQL 语言运行时来运行此单元格中的代码，而不是 PySpark。
+    - 单元格开头的 **%sql** 行（称为 magic）指示应使用 Spark SQL 语言运行时来运行此单元格中的代码，而不是 PySpark。
     - SQL 代码会引用之前创建的 **salesorder** 视图。
     - SQL 查询的输出将自动显示为单元格下的结果。
     

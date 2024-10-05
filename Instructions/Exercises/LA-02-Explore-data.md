@@ -11,7 +11,7 @@ Azure Databricks 有助于探索性数据分析 (EDA)，使用户能够快速发
 
 它与 EDA 的各种工具和技术（包括统计方法和可视化）集成，以汇总数据特征并识别任何潜在问题。
 
-完成此练习大约需要 45 分钟。
+完成此练习大约需要 30 分钟。
 
 ## 预配 Azure Databricks 工作区
 
@@ -26,7 +26,7 @@ Azure Databricks 有助于探索性数据分析 (EDA)，使用户能够快速发
 
     ![具有 Cloud Shell 窗格的 Azure 门户](./images/cloud-shell.png)
 
-    > 注意：如果以前创建了使用 Bash 环境的 Cloud shell，请使用 Cloud Shell 窗格左上角的下拉菜单将其更改为“PowerShell”。
+    > **注意**：如果以前创建了使用 Bash 环境的 Cloud Shell，请使用 Cloud Shell 窗格左上角的下拉菜单将其更改为 PowerShell********。
 
 3. 请注意，可以通过拖动窗格顶部的分隔条或使用窗格右上角的 &#8212;、&#9723; 或 X 图标来调整 Cloud Shell 的大小，以最小化、最大化和关闭窗格  。 有关如何使用 Azure Cloud Shell 的详细信息，请参阅 [Azure Cloud Shell 文档](https://docs.microsoft.com/azure/cloud-shell/overview)。
 
@@ -68,7 +68,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
     - 访问模式：单用户（选择你的用户帐户）
     - **Databricks 运行时版本**：13.3 LTS（Spark 3.4.1、Scala 2.12）或更高版本
     - 使用 Photon 加速：已选择
-    - 节点类型：Standard_DS3_v2
+    - **节点类型**：Standard_D4ds_v5
     - 在处于不活动状态 20 分钟后终止**********
 
 1. 等待群集创建完成。 这可能需要一到两分钟时间。
@@ -79,7 +79,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 1. 在边栏中，使用“(+) 新建”**** 链接创建**笔记本**。
    
-1. 将默认笔记本名称（**无标题笔记本 *[日期]***）更改为“**使用 Spark 浏览数据**”，然后在“**连接**”下拉列表中选择群集（如果尚未选择）。 如果群集未运行，可能需要一分钟左右才能启动。
+1. 将默认笔记本名称 (**Untitled Notebook *[date]***) 更改为 `Explore data with Spark`，然后在“**连接**”下拉列表中选择群集（如果尚未选择）。 如果群集未运行，可能需要一分钟左右才能启动。
 
 ## 引入数据
 

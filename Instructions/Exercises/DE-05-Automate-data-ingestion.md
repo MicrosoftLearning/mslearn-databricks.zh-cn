@@ -65,7 +65,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
     - 访问模式：单用户（选择你的用户帐户）
     - **Databricks 运行时版本**：13.3 LTS（Spark 3.4.1、Scala 2.12）或更高版本
     - 使用 Photon 加速：已选择
-    - 节点类型：Standard_DS3_v2
+    - **节点类型**：Standard_D4ds_v5
     - 在处于不活动状态 20 分钟后终止**********
 
 1. 等待群集创建完成。 这可能需要一到两分钟时间。

@@ -21,7 +21,7 @@ Delta Lake 是一个开源项目，用于在数据湖之上为 Spark 生成事�
 
     ![具有 Cloud Shell 窗格的 Azure 门户](./images/cloud-shell.png)
 
-    > 注意：如果以前创建了使用 Bash 环境的 Cloud shell，请使用 Cloud Shell 窗格左上角的下拉菜单将其更改为“PowerShell”。
+    > **注意**：如果以前创建了使用 Bash 环境的 Cloud Shell，请使用 Cloud Shell 窗格左上角的下拉菜单将其更改为 PowerShell********。
 
 3. 请注意，可以通过拖动窗格顶部的分隔条或使用窗格右上角的 &#8212;、&#9723; 或 X 图标来调整 Cloud Shell 的大小，以最小化、最大化和关闭窗格  。 有关如何使用 Azure Cloud Shell 的详细信息，请参阅 [Azure Cloud Shell 文档](https://docs.microsoft.com/azure/cloud-shell/overview)。
 
@@ -65,7 +65,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
     - 访问模式：单用户（选择你的用户帐户）
     - **Databricks 运行时版本**：13.3 LTS（Spark 3.4.1、Scala 2.12）或更高版本
     - 使用 Photon 加速：已选择
-    - 节点类型：Standard_DS3_v2
+    - **节点类型**：Standard_D4ds_v5
     - 在处于不活动状态 20 分钟后终止**********
 
 1. 等待群集创建完成。 这可能需要一到两分钟时间。
@@ -78,7 +78,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 1. 在边栏中，使用“(+) 新建”**** 链接创建**笔记本**。
 
-1. 将默认笔记本名称（**Untitled Notebook *[日期]***）更改为“Explore Delta Lake”，然后在“连接”下拉列表中选择群集（如果尚未选中）****。**** 如果群集未运行，可能需要一分钟左右才能启动。
+1. 将默认笔记本名称 (**Untitled Notebook *[date]***) 更改为 `Explore Delta Lake`，然后在“**连接**”下拉列表中选择群集（如果尚未选择）。 如果群集未运行，可能需要一分钟左右才能启动。
 
 1. 在笔记本的第一个单元格中输入以下代码，该代码使用 *shell* 命令将数据文件从 GitHub 下载到群集使用的文件系统中。
 
@@ -111,7 +111,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
     Delta Lake 表的数据以 Parquet 格式存储。 此外还创建一个日志文件来跟踪对数据所做的修改。
 
-1. 添加一个新的代码单元格并使用它运行以下 shell 命令来查看保存 Delta 数据的文件夹的内容。
+1. 添加一个新的代码单元格并使用它运行以下 shell 命令来查看保存增量数据的文件夹的内容。
 
     ```
     %sh
@@ -169,7 +169,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 ### 创建外部表
 
-1. 使用以下代码来创建名为“AdventureWorks”的新数据库，然后基于前面定义的 Delta 文件的路径在该数据库中创建名为“ProductsExternal”的外部表********：
+1. 使用以下代码来创建名为“**AdventureWorks**”的新数据库，然后基于前面定义的增量文件的路径在该数据库中创建名为“**ProductsExternal**”的外部表：
 
     ```python
    spark.sql("CREATE DATABASE AdventureWorks")
@@ -189,7 +189,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 ### 创建托管表
 
-1. 运行以下代码，根据你最初从 products.csv**** 文件加载的数据帧（在更新产品 771 的价格之前）创建（并描述）名为 ProductsManaged**** 的托管表。
+1. 运行以下代码，根据最初从 **products.csv** 文件加载的数据帧（在更新产品 771 的价格之前）创建（然后描述）名为 **ProductsManaged** 的托管表。
 
     ```python
    df.write.format("delta").saveAsTable("AdventureWorks.ProductsManaged")

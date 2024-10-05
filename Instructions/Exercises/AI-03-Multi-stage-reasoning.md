@@ -1,167 +1,277 @@
-# 练习 03 - 使用 Azure Databricks 和 GPT-4 通过 LangChain 进行多阶段推理
+---
+lab:
+  title: 使用 Azure Databricks 和 Azure OpenAI 通过 LangChain 进行多阶段推理
+---
 
-## 目标
-本练习旨在指导你在 Azure Databricks 上使用 LangChain 构建多阶段推理系统。 你将了解如何创建矢量索引、存储嵌入、生成基于检索器的链、构造图像生成链，以及最后使用 GPT-4 OpenAI 模型将它们合并到多链系统中。
+# 使用 Azure Databricks 和 Azure OpenAI 通过 LangChain 进行多阶段推理
 
-## 要求
-一个有效的 Azure 订阅。 如果没有该帐户，可以注册[免费试用版](https://azure.microsoft.com/en-us/free/)。
+多阶段推理是 AI 中的一种前沿方法，涉及将复杂问题分解为更小、更易于管理的阶段。 LangChain 是一个软件框架，有助于创建利用大型语言模型 (LLM) 的应用程序。 与 Azure Databricks 集成时，LangChain 允许无缝数据加载、模型包装和开发复杂的 AI 代理。 这种组合特别强大，用于处理复杂的任务，这些任务需要深入了解上下文以及跨多个步骤推理的能力。
 
-## 步骤 1：预配 Azure Databricks
-- 登录到 Azure 门户：
-    1. 转到 Azure 门户，然后使用凭据登录。
-- 创建 Databricks 服务：
-    1. 导航到“创建资源”>“分析”>“Azure Databricks”。
-    2. 输入所需的详细信息，例如工作区名称、订阅、资源组（新建或选择现有），以及位置。
-    3. 选择定价层（为此实验室选择标准定价层）。
-    4. 单击“查看 + 创建”，然后在通过验证后单击“创建”。
+完成本实验室大约需要 30 分钟。
 
-## 步骤 2：启动工作区并创建群集
-- 启动 Databricks 工作区：
-    1. 部署完成后，转到资源并单击“启动工作区”。
-- 创建 Spark 群集：
-    1. 在 Databricks 工作区中，单击边栏上的“计算”，然后单击“创建计算”。
-    2. 指定群集名称并选择 Spark 的运行时版本。
-    3. 根据可用选项选择将辅助角色类型作为“标准”和节点类型（选择较小的节点以提高成本效益）。
-    4. 单击“创建计算”。
+## 开始之前
 
-## 步骤 3：安装所需的库
+需要一个你在其中具有管理级权限的 [Azure 订阅](https://azure.microsoft.com/free)。
 
-- 在工作区中打开一个新笔记本。
-- 使用以下命令安装必要的库：
+## 预配 Azure OpenAI 资源
 
-```python
-%pip install langchain openai faiss-cpu
-```
+如果还没有 Azure OpenAI 资源，请在 Azure 订阅中预配 Azure OpenAI 资源。
 
-- 配置 OpenAI API
+1. 登录到 Azure 门户，地址为 ****。
+2. 请使用以下设置创建 Azure OpenAI 资源：
+    - 订阅****：*选择已被批准访问 Azure OpenAI 服务的 Azure 订阅*
+    - **资源组**：*创建或选择资源组*
+    - 区域****：从以下任何区域中进行随机选择******\*
+        - 澳大利亚东部
+        - 加拿大东部
+        - 美国东部
+        - 美国东部 2
+        - 法国中部
+        - 日本东部
+        - 美国中北部
+        - 瑞典中部
+        - 瑞士北部
+        - 英国南部
+    - **名称**：所选项的唯一名称**
+    - **定价层**：标准版 S0
 
-```python
-import os
-os.environ["OPENAI_API_KEY"] = "your-openai-api-key"
-```
+> \* Azure OpenAI 资源受区域配额约束。 列出的区域包括本练习中使用的模型类型的默认配额。 在与其他用户共享订阅的情况下，随机选择一个区域可以降低单个区域达到配额限制的风险。 如果稍后在练习中达到配额限制，你可能需要在不同的区域中创建另一个资源。
 
-## 步骤 4：创建矢量索引和存储嵌入
+3. 等待部署完成。 然后在 Azure 门户中转至部署的 Azure OpenAI 资源。
 
-- 加载数据集
-    1. 加载要为其生成嵌入内容的示例数据集。 对于本实验室，我们将使用小型文本数据集。
+4. 在左窗格的“**资源管理**”下，选择“**密钥和终结点**”。
 
-    ```python
-    sample_texts = [
-        "Azure Databricks is a fast, easy, and collaborative Apache Spark-based analytics platform.",
-        "LangChain is a framework designed to simplify the creation of applications using large language models.",
-        "GPT-4 is a powerful language model developed by OpenAI."
-    ]
-    ```
-- 生成嵌入内容
-    1. 使用 OpenAI GPT-4 模型为这些文本生成嵌入内容。
+5. 复制终结点和其中一个可用密钥，因为稍后将在本练习中使用它。
 
-    ```python
-    from langchain.embeddings.openai import OpenAIEmbeddings
+## 部署所需的模块
 
-    embeddings_model = OpenAIEmbeddings()
-    embeddings = embeddings_model.embed_documents(sample_texts)
-    ``` 
+Azure 提供了一个名为 **Azure AI Studio** 的基于 Web 的门户，可用于部署、管理和探索模型。 你将通过使用 Azure OpenAI Studio 部署模型，开始探索 Azure OpenAI。
 
-- 使用 FAISS 存储嵌入内容
-    1. 使用 FAISS 创建矢量索引，以提高检索效率。
+> **备注**：使用 Azure AI Studio 时，可能会显示建议你执行任务的消息框。 可以关闭这些消息框并按照本练习中的步骤进行操作。
 
-    ```python
-    import faiss
-    import numpy as np
-
-    dimension = len(embeddings[0])
-    index = faiss.IndexFlatL2(dimension)
-    index.add(np.array(embeddings))
-    ```
-
-## 步骤 5：生成基于检索器的链
-- 定义检索器
-    1. 创建一个检索器，该检索器可以搜索最相似文本的向量索引。
-
-    ```python
-    from langchain.chains import RetrievalQA
-    from langchain.vectorstores.faiss import FAISS
-
-    vector_store = FAISS(index, embeddings_model)
-    retriever = vector_store.as_retriever()  
-    ```
-
-- 生成 RetrievalQA 链
-    1. 使用检索器和 GPT-4 模型创建 QA 系统。
+1. 在 Azure 门户中的 Azure OpenAI 资源的“**概述**”页上，向下滚动到“**开始**”部分，然后选择转到 **Azure AI Studio** 的按钮。
+   
+1. 在 Azure AI Studio 的左侧窗格中，选择“**部署**”页并查看现有模型部署。 如果没有模型部署，请使用以下设置创建新的“gpt-35-turbo-16k”**** 模型部署：
+    - **部署名称**：*gpt-35-turbo-16k*
+    - **模型**：gpt-35-turbo-16k *（如果 16k 模型不可用，请选择 gpt-35-turbo 并相应地对部署进行命名）*
+    - **模型版本**：*使用默认版本*
+    - **部署类型**：标准
+    - **每分钟令牌速率限制**：5K\*
+    - **内容筛选器**：默认
+    - **启用动态配额**：已禁用
     
-    ```python
-    from langchain.llms import OpenAI
-    from langchain.chains.question_answering import load_qa_chain
+1. 返回到“**部署**”页，使用以下设置创建“**text-embedding-ada-002**”模型的新部署：
+    - **部署名称**：*text-embedding-ada-002*
+    - **模型**：text-embedding-ada-002
+    - **模型版本**：*使用默认版本*
+    - **部署类型**：标准
+    - **每分钟令牌速率限制**：5K\*
+    - **内容筛选器**：默认
+    - **启用动态配额**：已禁用
 
-    llm = OpenAI(model_name="gpt-4")
-    qa_chain = load_qa_chain(llm, retriever)
-    ```
+> \*每分钟 5,000 个令牌的速率限制足以完成此练习，同时也为使用同一订阅的其他人留出容量。
 
-- 测试 QA 系统
-    1. 提出与嵌入的文本相关的问题
+## 预配 Azure Databricks 工作区
 
-    ```python
-    result = qa_chain.run("What is Azure Databricks?")
-    print(result)
-    ```
+> **提示**：如果你已有 Azure Databricks 工作区，则可以跳过此过程并使用现有工作区。
 
-## 步骤 6：生成图像生成链
+1. 登录到 Azure 门户，地址为 ****。
+2. 请使用以下设置创建 **Azure Databricks** 资源：
+    - **订阅**：*选择用于创建 Azure OpenAI 资源的同一 Azure 订阅*
+    - **资源组**：*在其中创建了 Azure OpenAI 资源的同一资源组*
+    - **区域**：*在其中创建 Azure OpenAI 资源的同一区域*
+    - **名称**：所选项的唯一名称**
+    - **定价层**：*高级*或*试用版*
 
-- 设置图像生成模型
-    1. 使用 GPT-4 配置图像生成功能。
+3. 选择“**查看 + 创建**”，然后等待部署完成。 然后转到资源并启动工作区。
 
-    ```python
-    from langchain.chains import SimpleChain
+## 创建群集
 
-    def generate_image(prompt):
-        # Assuming you have an endpoint or a tool to generate images from text.
-        return f"Generated image for prompt: {prompt}"
+Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集在多个节点上并行处理数据。 每个群集由一个用于协调工作的驱动程序节点和多个用于执行处理任务的工作器节点组成。 在本练习中，将创建一个*单节点*群集，以最大程度地减少实验室环境中使用的计算资源（在实验室环境中，资源可能会受到限制）。 在生产环境中，通常会创建具有多个工作器节点的群集。
 
-    image_generation_chain = SimpleChain(input_variables=["prompt"], output_variables=["image"], transform=generate_image)
-    ```
+> **提示**：如果 Azure Databricks 工作区中已有一个具有 13.3 LTS ML**<u></u>** 或更高运行时版本的群集，则可以使用它来完成此练习并跳过此过程。
 
-- 测试图像生成链
-    1. 基于文本提示生成图像。
+1. 在Azure 门户中，浏览到创建 Azure Databricks 工作区的资源组。
+2. 单击 Azure Databricks 服务资源。
+3. 在工作区的“概述”**** 页中，使用“启动工作区”**** 按钮在新的浏览器标签页中打开 Azure Databricks 工作区；请在出现提示时登录。
 
-    ```python
-    prompt = "A futuristic city with flying cars"
-    image_result = image_generation_chain.run(prompt=prompt)
-    print(image_result)
-    ```
+> 提示：使用 Databricks 工作区门户时，可能会显示各种提示和通知。 消除这些内容，并按照提供的说明完成本练习中的任务。
 
-## 步骤 7：将链合并到多链系统中
-- 合并链
-    1. 将基于检索器的 QA 链和图像生成链整合到多链系统中。
+4. 在左侧边栏中，选择“**(+) 新建**”任务，然后选择“**群集**”。
+5. 在“新建群集”页中，使用以下设置创建新群集：
+    - 群集名称：用户名的群集（默认群集名称）
+    - **策略**：非受限
+    - 群集模式：单节点
+    - 访问模式：单用户（选择你的用户帐户）
+    - Databricks Runtime 版本****：选择最新非 beta 版本运行时的 ML***<u></u>** 版本（不是****标准运行时版本），该版本符合以下条件：*
+        - 不使用 GPU**
+        - 包括 Scala > 2.11
+        - *包括 Spark > **3.4***
+    - 使用 Photon 加速****：未选定<u></u>
+    - **节点类型**：Standard_D4ds_v5
+    - 在处于不活动状态 20 分钟后终止**********
 
-    ```python
-    from langchain.chains import MultiChain
+6. 等待群集创建完成。 这可能需要一到两分钟时间。
 
-    multi_chain = MultiChain(
-        chains=[
-            {"name": "qa", "chain": qa_chain},
-            {"name": "image_generation", "chain": image_generation_chain}
-        ]
+> 注意：如果群集无法启动，则订阅在预配 Azure Databricks 工作区的区域中的配额可能不足。 请参阅 [CPU 内核限制阻止创建群集](https://docs.microsoft.com/azure/databricks/kb/clusters/azure-core-limit)，了解详细信息。 如果发生这种情况，可以尝试删除工作区，并在其他区域创建新工作区。
+
+## 安装所需的库
+
+1. 在 Databricks 工作区中，转到“工作区”**** 部分。
+
+2. 选择“创建”****，然后选择“笔记本”****。
+
+3. 为笔记本命名，然后选择“`Python`”作为语言。
+
+4. 在第一个代码单元格中，输入并运行以下代码以安装所需的库：
+   
+     ```python
+    %pip install langchain openai langchain_openai faiss-cpu
+     ```
+
+5. 安装完成后，在新单元格中重启内核：
+
+     ```python
+    %restart_python
+     ```
+
+6. 在新单元格中，定义将用于初始化 OpenAI 模型的身份验证参数，并将 `your_openai_endpoint` 和 `your_openai_api_key` 替换为之前从 OpenAI 资源复制的终结点和密钥：
+
+     ```python
+    endpoint = "your_openai_endpoint"
+    key = "your_openai_api_key"
+     ```
+     
+## 创建矢量索引和存储嵌入
+
+矢量索引是一种专用数据结构，用于高效存储和检索高维矢量数据，这对于执行快速相似性搜索和最近的邻域查询至关重要。 另一方面，嵌入是对象的数字表示形式，这些对象以矢量形式捕获其含义，使计算机能够处理和理解各种类型的数据，包括文本和图像。
+
+1. 在新单元格中，运行以下代码以加载示例数据集：
+
+     ```python
+    from langchain_core.documents import Document
+
+    documents = [
+         Document(page_content="Azure Databricks is a fast, easy, and collaborative Apache Spark-based analytics platform.", metadata={"date_created": "2024-08-22"}),
+         Document(page_content="LangChain is a framework designed to simplify the creation of applications using large language models.", metadata={"date_created": "2024-08-22"}),
+         Document(page_content="GPT-4 is a powerful language model developed by OpenAI.", metadata={"date_created": "2024-08-22"})
+    ]
+    ids = ["1", "2", "3"]
+     ```
+     
+1. 在新单元格中，运行以下代码以使用 `text-embedding-ada-002` 模型生成嵌入：
+
+     ```python
+    from langchain_openai import AzureOpenAIEmbeddings
+     
+    embedding_function = AzureOpenAIEmbeddings(
+        deployment="text-embedding-ada-002",
+        model="text-embedding-ada-002",
+        azure_endpoint=endpoint,
+        openai_api_key=key,
+        chunk_size=1
     )
-    ```
+     ```
+     
+1. 在新单元格中，运行以下代码，使用第一个文本示例创建矢量索引作为矢量维度的引用：
 
-- 运行多链系统
-    1. 传递同时涉及文本检索和图像生成的任务。
+     ```python
+    import faiss
+      
+    index = faiss.IndexFlatL2(len(embedding_function.embed_query("Azure Databricks is a fast, easy, and collaborative Apache Spark-based analytics platform.")))
+     ```
 
-    ```python
-    multi_task_input = {
-        "qa": {"question": "Tell me about LangChain."},
-        "image_generation": {"prompt": "A conceptual diagram of LangChain in use"}
-    }
+## 生成基于检索器的链
 
-    multi_task_output = multi_chain.run(multi_task_input)
-    print(multi_task_output)
-    ```
+检索器组件基于查询提取相关文档或数据。 这在需要集成大量数据以供分析的应用程序（例如在检索扩充的生成系统中）中特别有用。
 
-## 步骤 8：清理资源
-- 终止群集：
-    1. 返回到“计算”页，选择群集，然后单击“终止”以停止群集。
+1. 在新单元格中，运行以下代码来创建一个检索器，该检索器可以搜索最相似的文本的矢量索引。
 
-- 可选：删除 Databricks 服务：
-    1. 为了避免产生进一步的费用，如果此实验室不属于大型项目或学习路径，请考虑删除 Databricks 工作区。
+     ```python
+    from langchain.vectorstores import FAISS
+    from langchain_core.vectorstores import VectorStoreRetriever
+    from langchain_community.docstore.in_memory import InMemoryDocstore
 
-以上就是使用 Azure Databricks 通过 LangChain 进行多阶段推理的练习。
+    vector_store = FAISS(
+        embedding_function=embedding_function,
+        index=index,
+        docstore=InMemoryDocstore(),
+        index_to_docstore_id={}
+    )
+    vector_store.add_documents(documents=documents, ids=ids)
+    retriever = VectorStoreRetriever(vectorstore=vector_store)
+     ```
+
+1. 在新单元格中，运行以下代码，使用检索器和 `gpt-35-turbo-16k` 模型创建 QA 系统：
+    
+     ```python
+    from langchain_openai import AzureChatOpenAI
+    from langchain_core.prompts import ChatPromptTemplate
+    from langchain.chains.combine_documents import create_stuff_documents_chain
+    from langchain.chains import create_retrieval_chain
+     
+    llm = AzureChatOpenAI(
+        deployment_name="gpt-35-turbo-16k",
+        model_name="gpt-35-turbo-16k",
+        azure_endpoint=endpoint,
+        api_version="2023-03-15-preview",
+        openai_api_key=key,
+    )
+
+    system_prompt = (
+        "Use the given context to answer the question. "
+        "If you don't know the answer, say you don't know. "
+        "Use three sentences maximum and keep the answer concise. "
+        "Context: {context}"
+    )
+
+    prompt1 = ChatPromptTemplate.from_messages([
+        ("system", system_prompt),
+        ("human", "{input}")
+    ])
+
+    chain = create_stuff_documents_chain(llm, prompt)
+
+    qa_chain1 = create_retrieval_chain(retriever, chain)
+     ```
+
+1. 在新单元格中，运行以下代码来测试 QA 系统：
+
+     ```python
+    result = qa_chain1.invoke({"input": "What is Azure Databricks?"})
+    print(result)
+     ```
+
+结果输出应根据示例数据集中存在的相关文档以及 LLM 生成的生成式文本显示答案。
+
+## 将链合并到多链系统中
+
+Langchain 是一种通用的工具，允许将多个链组合到多链系统中，从而增强语言模型的功能。 此过程涉及将各种组件串在一起，这些组件可以并行或按顺序处理输入，最终合成最终响应。
+
+1. 在新单元格中，运行以下代码以创建第二个链
+
+     ```python
+    from langchain_core.prompts import ChatPromptTemplate
+    from langchain_core.output_parsers import StrOutputParser
+
+    prompt2 = ChatPromptTemplate.from_template("Create a social media post based on this summary: {summary}")
+
+    qa_chain2 = ({"summary": qa_chain1} | prompt2 | llm | StrOutputParser())
+     ```
+
+1. 在新单元格中，运行以下代码以调用具有给定输入的多阶段链：
+
+     ```python
+    result = qa_chain2.invoke({"input": "How can we use LangChain?"})
+    print(result)
+     ```
+
+第一个链基于提供的示例数据集提供输入答案，而第二个链基于第一个链的输出创建社交媒体帖子。 此方法允许你通过将多个步骤链接在一起来处理更复杂的文本处理任务。
+
+## 清理
+
+使用完 Azure OpenAI 资源后，请记得在位于 `https://portal.azure.com` 的 **Azure 门户** 中删除部署或整个资源。
+
+在 Azure Databricks 门户的“**计算**”页上，选择群集，然后选择“**&#9632; 终止**”以将其关闭。
+
+如果已完成对 Azure Databricks 的探索，则可以删除已创建的资源，以避免产生不必要的 Azure 成本并释放订阅中的容量。
