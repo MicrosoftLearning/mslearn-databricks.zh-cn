@@ -21,7 +21,7 @@ lab:
 
     ![具有 Cloud Shell 窗格的 Azure 门户](./images/cloud-shell.png)
 
-    > 注意：如果以前创建了使用 Bash 环境的 Cloud shell，请使用 Cloud Shell 窗格左上角的下拉菜单将其更改为“PowerShell”。
+    > **注意**：如果以前创建了使用 Bash 环境的 Cloud Shell，请使用 Cloud Shell 窗格左上角的下拉菜单将其更改为 PowerShell********。
 
 3. 请注意，可以通过拖动窗格顶部的分隔条或使用窗格右上角的 &#8212;、&#9723; 或 X 图标来调整 Cloud Shell 的大小，以最小化、最大化和关闭窗格  。 有关如何使用 Azure Cloud Shell 的详细信息，请参阅 [Azure Cloud Shell 文档](https://docs.microsoft.com/azure/cloud-shell/overview)。
 
@@ -65,7 +65,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
     - 访问模式：单用户（选择你的用户帐户）
     - **Databricks 运行时版本**：13.3 LTS（Spark 3.4.1、Scala 2.12）或更高版本
     - 使用 Photon 加速：已选择
-    - 节点类型：Standard_DS3_v2
+    - **节点类型**：Standard_D4ds_v5
     - 在处于不活动状态 20 分钟后终止**********
 
 1. 等待群集创建完成。 这可能需要一到两分钟时间。
@@ -76,7 +76,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 1. 在边栏中，使用“(+) 新建”**** 链接创建**笔记本**。
 
-2. 将默认笔记本名称（**无标题笔记本*[日期]***）更改为**使用 Delta Live Tables 创建管道**，然后在**连接**下拉列表中选择群集（如果尚未选择）。 如果群集未运行，可能需要一分钟左右才能启动。
+2. 将默认笔记本名称 (**Untitled Notebook *[date]***) 更改为 `Create a pipeline with Delta Live tables`，然后在“**连接**”下拉列表中选择群集（如果尚未选择）。 如果群集未运行，可能需要一分钟左右才能启动。
 
 3. 在笔记本的第一个单元格中输入以下代码，该代码使用 *shell* 命令将数据文件从 GitHub 下载到群集使用的文件系统中。
 
@@ -91,7 +91,9 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 ## 使用 SQL 创建 Delta Live Tables 管道
 
-创建新的 SQL 笔记本，并开始使用 SQL 脚本定义 Delta Live Tables。 确保已启用 DLT SQL UI。
+创建新的笔记本，并开始使用 SQL 脚本定义增量实时表。
+
+1. 在笔记本名称旁边，选择 **Python** 并将默认语言更改为 **SQL**。
 
 1. 将以下代码放在第一个单元格中，无需运行它。 创建管道后，将执行所有单元格。 此代码定义一个 Delta Live Table，该表将由以前下载的原始数据填充：
 
@@ -117,7 +119,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
     COMMENT "Formatted and filtered data for analysis."
     AS
     SELECT
-        DATE_FORMAT(Last_Update, 'MM/dd/yyyy') as Report_Date,
+        TO_DATE(Last_Update, 'MM/dd/yyyy') as Report_Date,
         Country_Region,
         Confirmed,
         Deaths,
@@ -143,7 +145,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 4. 在左侧栏中选择“Delta Live Tables”****，然后选择“创建管道”****。
 
 5. 在“创建管道”**** 页中，使用以下设置创建新管道：
-    - **管道名称**：给管道命名
+    - **管道名称**：设置管道的名称
     - **产品版本**：高级
     - **管道模式**：触发式
     - **源代码**：选择 SQL 笔记本
@@ -154,15 +156,15 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
  
 7. 成功执行管道后，返回到第一个笔记本，并使用以下代码验证是否已在指定的存储位置创建所有 3 个新表：
 
-     ```sql
-    display(dbutils.fs.ls("dbfs:/pipelines/delta_lab"))
+     ```python
+    display(dbutils.fs.ls("dbfs:/pipelines/delta_lab/tables"))
      ```
 
 ## 以可视化效果的形式查看结果
 
 创建表后，可以将这些表加载到数据帧并可视化数据。
 
-1. 在第一个笔记本中，添加新的代码单元并运行以下代码，以将 `aggregated_covid_data` 加载到数据帧中：
+1. 在第一个笔记本中，添加新的代码单元并运行以下代码，将 `aggregated_covid_data` 加载到数据帧中：
 
     ```python
    df = spark.read.format("delta").load('/pipelines/delta_lab/tables/aggregated_covid_data')
@@ -174,7 +176,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
     - **X 列**：Report_Date
     - **Y 列**：添加新列并选择**“Total_Confirmed”****。 *应用* **Sum** *聚合*。
 
-1. 保存可视化效果，然后在笔记本中查看生成的图表。
+1. 保存可视化效果，然后查看笔记本中生成的图表。
 
 ## 清理
 

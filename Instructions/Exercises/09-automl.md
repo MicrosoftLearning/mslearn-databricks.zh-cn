@@ -1,6 +1,6 @@
 ---
 lab:
-  title: 使用 AutoML 训练模型
+  title: 已弃用 - 使用 AutoML 训练模型
 ---
 
 # 使用 AutoML 训练模型
@@ -17,7 +17,7 @@ AutoML 是 Azure Databricks 的一项功能，它会尝试将多种算法和参�
 
 > **注意**：就本练习来说，你需要一个**高级** Azure Databricks 工作区，该工作区位于某个支持*模型服务*的区域中。 有关区域 Azure Databricks 功能的详细信息，请参阅 [Azure Databricks 区域](https://learn.microsoft.com/azure/databricks/resources/supported-regions)。 如果你已在合适的区域拥有*高级*或*试用* Azure Databricks 工作区，则可以跳过此过程并使用现有工作区。
 
-本练习包括一个用于预配新 Azure Databricks 工作区的脚本。 该脚本会尝试在一个区域中创建*高级*层 Azure Databricks 工作区资源，在该区域中，Azure 订阅具有本练习所需计算核心的充足配额；该脚本假设你的用户帐户在订阅中具有足够的权限来创建 Azure Databricks 工作区资源。 如果脚本由于配额或权限不足而失败，可以尝试 [在 Azure 门户中以交互方式创建 Azure Databricks 工作区](https://learn.microsoft.com/azure/databricks/getting-started/#--create-an-azure-databricks-workspace)。
+本练习包括一个用于预配新 Azure Databricks 工作区的脚本。 该脚本会尝试在一个区域中创建*高级*层 Azure Databricks 工作区资源，在该区域中，Azure 订阅具有本练习所需计算核心的充足配额；该脚本假设你的用户帐户在订阅中具有足够的权限来创建 Azure Databricks 工作区资源。 如果脚本由于配额或权限不足失败，可以尝试 [在 Azure 门户中以交互方式创建 Azure Databricks 工作区](https://learn.microsoft.com/azure/databricks/getting-started/#--create-an-azure-databricks-workspace)。
 
 1. 在 Web 浏览器中，登录到 [Azure 门户](https://portal.azure.com)，网址为 `https://portal.azure.com`。
 2. 使用页面顶部搜索栏右侧的 [\>_] 按钮在 Azure 门户中创建新的 Cloud Shell，在出现提示时选择“PowerShell”环境并创建存储。 Cloud Shell 在 Azure 门户底部的窗格中提供命令行界面，如下所示：

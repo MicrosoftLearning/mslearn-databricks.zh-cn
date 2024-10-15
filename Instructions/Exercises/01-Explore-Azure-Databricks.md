@@ -1,6 +1,6 @@
 ---
 lab:
-  title: 了解 Azure Databricks
+  title: 已弃用 - 探索 Azure Databricks
 ---
 
 # 了解 Azure Databricks

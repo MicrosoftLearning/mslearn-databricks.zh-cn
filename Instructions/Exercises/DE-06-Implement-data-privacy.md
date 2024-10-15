@@ -1,13 +1,17 @@
 ---
 lab:
-  title: 通过 Azure Databricks 使用 Microsoft Purview 和 Unity Catalog 实现数据隐私和治理
+  title: 通过 Azure Databricks 使用 Unity Catalog 实现数据隐私和治理
 ---
 
-# 通过 Azure Databricks 使用 Microsoft Purview 和 Unity Catalog 实现数据隐私和治理
+# 通过 Azure Databricks 使用 Unity Catalog 实现数据隐私和治理
 
-Microsoft Purview 允许跨整个数据资产进行全面的数据治理，可与 Azure Databricks 完美集成以管理 Lakehouse 数据并将元数据引入数据映射。 Unity Catalog 提供集中式数据管理和治理，简化了 Databricks 工作区中的安全性和合规性，从而对这一点进行了提升。
+Unity Catalog 为数据和 AI 提供集中管理解决方案，通过提供单一的管理和审核数据访问的环境来简化安全性。 它支持精细的访问控制列表 (ACL) 和动态数据掩码，这对于保护敏感信息至关重要。 
 
 完成本实验室大约需要 30 分钟。
+
+## 开始之前
+
+需要一个你在其中具有管理级权限的 [Azure 订阅](https://azure.microsoft.com/free)。
 
 ## 预配 Azure Databricks 工作区
 
@@ -65,7 +69,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
     - 访问模式：单用户（选择你的用户帐户）
     - **Databricks 运行时版本**：13.3 LTS（Spark 3.4.1、Scala 2.12）或更高版本
     - 使用 Photon 加速：已选择
-    - 节点类型：Standard_DS3_v2
+    - **节点类型**：Standard_D4ds_v5
     - 在处于不活动状态 20 分钟后终止**********
 
 1. 等待群集创建完成。 这可能需要一到两分钟时间。
@@ -121,66 +125,42 @@ Unity Catalog 元存储会注册有关安全对象（例如表、卷、外部位
 
 >**备注：** 在 `.load` 文件路径中，将 `databricksxxxxxxx` 替换为目录名称。
 
-9. 在目录资源管理器中，导航到 `sample_data` 卷并验证新表是否位于其中。
+9. 在目录资源管理器中，导航到 `ecommerce` 架构并验证新表是否位于其中。
     
-## 设置 Microsoft Purview
+## 设置 ACL 和动态数据掩码
 
-Microsoft Purview 是一种统一的数据治理服务，可帮助组织在各种环境中管理数据并保护其安全。 借助数据丢失防护、信息保护和合规性管理等功能，Microsoft Purview 提供在整个生命周期内了解、管理和保护数据的工具。
+访问控制列表 (ACL) 是 Azure Databricks 中数据安全性的基本方面，允许为各种工作区对象配置权限。 借助 Unity Catalog，可以集中管理和审核数据访问，提供对于管理数据和 AI 资产至关重要的细化安全模型。 
 
-1. 导航到 [Azure 门户](https://portal.azure.com/)。
-
-2. 选择“创建资源”**** 并搜索“Microsoft Purview”****。
-
-3. 使用以下设置创建 Microsoft Purview**** 资源：
-    - 订阅****：*选择 Azure 订阅*
-    - **资源组**：*选择与 Azure Databricks 工作区相同的资源组*
-    - **Microsoft Purview 帐户名称**：*所选的唯一名称*
-    - **位置**：*选择与 Azure Databricks 工作区相同的区域*
-
-4. 选择“查看 + 创建”  。 等待验证完成，然后选择“创建”****。
-
-5. 等待部署完成。 然后，在 Azure 门户中转到已部署的 Microsoft Purview 资源。
-
-6. 在 Microsoft Purview 治理门户中，导航到边栏中的“数据映射”**** 部分。
-
-7. 在“数据源”**** 窗格中，选择“注册”****。
-
-8. 在“注册数据源”**** 窗口中，搜索并选择“Azure Databricks”****。 选择**继续**。
-
-9. 为数据源指定唯一名称，然后选择 Azure Databricks 工作区。 选择**注册**。
-
-## 实现数据隐私和治理策略
-
-1. 在边栏的“数据映射”**** 部分中，选择“分类”****。
-
-2. 在“分类”**** 窗格中，选择“+ 新建”**** 并新建名为 PII**** 的分类（个人身份信息）。 选择“确定”****。
-
-3. 在边栏中选择“数据目录”**** 并导航到“客户”**** 表。
-
-4. 将 PII 分类应用于电子邮件和电话列。
-
-5. 转到 Azure Databricks 并打开以前创建的笔记本。
- 
-6. 在新建单元格中，运行以下代码以创建数据访问策略，以限制对 PII 数据的访问。
+1. 在新单元格中，运行以下代码来创建 `customers` 表的安全视图，以限制对 PII（个人身份信息）数据的访问。
 
      ```sql
-    CREATE OR REPLACE TABLE ecommerce.customers (
-      customer_id STRING,
-      name STRING,
-      email STRING,
-      phone STRING,
-      address STRING,
-      city STRING,
-      state STRING,
-      zip_code STRING,
-      country STRING
-    ) TBLPROPERTIES ('data_classification'='PII');
-
-    GRANT SELECT ON TABLE ecommerce.customers TO ROLE data_scientist;
-    REVOKE SELECT (email, phone) ON TABLE ecommerce.customers FROM ROLE data_scientist;
+    CREATE VIEW ecommerce.customers_secure_view AS
+    SELECT 
+        customer_id, 
+        name, 
+        address,
+        city,
+        state,
+        zip_code,
+        country, 
+        CASE 
+            WHEN current_user() = 'admin_user@example.com' THEN email
+            ELSE NULL 
+        END AS email, 
+        CASE 
+            WHEN current_user() = 'admin_user@example.com' THEN phone 
+            ELSE NULL 
+        END AS phone
+    FROM ecommerce.customers;
      ```
 
-7. 尝试将客户表查询为具有 data_scientist 角色的用户。 验证对 PII 列（电子邮件和电话）的访问是否受到限制。
+2. 查询安全视图：
+
+     ```sql
+    SELECT * FROM ecommerce.customers_secure_view
+     ```
+
+验证访问 PII 列（电子邮件和电话）是否受到限制，因为你不是以 `admin_user@example.com` 的身份访问数据。
 
 ## 清理
 
