@@ -20,7 +20,7 @@ lab:
 
     ![具有 Cloud Shell 窗格的 Azure 门户](./images/cloud-shell.png)
 
-    > 注意：如果以前创建了使用 Bash 环境的 Cloud shell，请使用 Cloud Shell 窗格左上角的下拉菜单将其更改为“PowerShell”。
+    > **注意**：如果以前创建了使用 Bash 环境的 Cloud Shell，请使用 Cloud Shell 窗格左上角的下拉菜单将其更改为 PowerShell********。
 
 3. 请注意，可以通过拖动窗格顶部的分隔条或使用窗格右上角的 &#8212;、&#9723; 或 X 图标来调整 Cloud Shell 的大小，以最小化、最大化和关闭窗格  。 有关如何使用 Azure Cloud Shell 的详细信息，请参阅 [Azure Cloud Shell 文档](https://docs.microsoft.com/azure/cloud-shell/overview)。
 
@@ -65,7 +65,7 @@ lab:
 
 1. 查看 Azure Databricks 工作区门户，请注意，左侧边栏包含可执行的各种任务的图标。
 1. 在边栏中，使用“(+) 新建”**** 链接创建**笔记本**。
-1. 将默认笔记本名称（Untitled Notebook [日期]******）更改为“Process Data”****。
+1. 将默认笔记本名称 (**Untitled Notebook *[date]***) 更改为 `Process Data`。
 1. 在笔记本的第一个单元格中，输入（但不运行）以下代码，为供此笔记本在其中保存数据的文件夹设置一个变量。
 
     ```python
@@ -113,9 +113,9 @@ lab:
 4. 在“管理”页的“链接服务”选项卡中，选择“+ 新建”添加新的链接服务  。
 5. 在“新建链接服务”窗格中，选择顶部的“计算”选项卡 。 然后选择“Azure Databricks”。
 6. 继续，使用以下设置创建链接服务：
-    - 名称：AzureDatabricks
-    - 说明：Azure Databricks 工作区
-    - 通过集成运行时连接：AutoResolveInegrationRuntime
+    - **名称**：`AzureDatabricks`
+    - **说明**：`Azure Databricks workspace`
+    - 通过集成运行时连接：AutoResolveIntegrationRuntime
     - 帐户选择方式：从 Azure 订阅
     - Azure 订阅：选择你的订阅
     - Databricks 工作区：选择你的 databricksxxxxxxx 工作区**
@@ -137,11 +137,11 @@ lab:
 
 1. 在 Azure 数据工厂工作室的导航窗格中，选择“创作”。
 2. 在“创作”页上的“工厂资源”窗格中，使用 + 图标添加“管道”   。
-3. 在新管道的“属性”窗格中，将其名称更改为“使用 Databricks 处理数据” 。 然后使用工具栏右侧的“属性”按钮（看起来类似于“&#128463;”<sub>*</sub>）隐藏“属性”窗格  。
+3. 在新管道的“**属性**”窗格中，将其名称更改为 `Process Data with Databricks`。 然后使用工具栏右侧的“属性”按钮（看起来类似于“&#128463;”<sub>*</sub>）隐藏“属性”窗格  。
 4. 在“活动”窗格中展开“Databricks”，将“笔记本”活动拖动到管道设计器图面  。
 5. 选择新的“Notebook1”活动后，在底部窗格中设置以下属性：
     - 常规：
-        - 名称：处理数据
+        - **名称**：`Process Data`
     - Azure Databricks：
         - Databricks 链接服务：选择之前创建的 AzureDatabricks 链接服务**
     - 设置：
