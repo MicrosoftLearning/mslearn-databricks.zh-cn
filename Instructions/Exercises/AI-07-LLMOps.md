@@ -108,10 +108,10 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 3. 为笔记本命名，然后选择“`Python`”作为语言。
 
-4. 在第一个代码单元格中，输入并运行以下代码以安装所需的库：
+4. 在第一个代码单元格中，输入并运行以下代码以安装 OpenAI 库：
    
      ```python
-    %pip install azure-ai-openai flask
+    %pip install openai
      ```
 
 5. 安装完成后，在新单元格中重启内核：
@@ -122,80 +122,66 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 ## 使用 MLflow 记录 LLM
 
+MLflow 的 LLM 跟踪功能允许记录参数、指标、预测和项目。 参数包括详细描述输入配置的键值对，而指标提供性能的定量度量值。 预测包括输入提示和模型的响应，这些响应存储为项目，以便轻松检索。 这种结构化日志记录有助于维护每个交互的详细记录，从而更好地分析和优化 LLM。
+
+1. 在新单元格中，使用本练习开始时复制的访问信息运行以下代码，以便在使用 Azure OpenAI 资源时分配用于身份验证的持久性环境变量：
+
+     ```python
+    import os
+
+    os.environ["AZURE_OPENAI_API_KEY"] = "your_openai_api_key"
+    os.environ["AZURE_OPENAI_ENDPOINT"] = "your_openai_endpoint"
+    os.environ["AZURE_OPENAI_API_VERSION"] = "2023-03-15-preview"
+     ```
 1. 在新单元格中，运行以下代码来初始化 Azure OpenAI 客户端：
 
      ```python
-    from azure.ai.openai import OpenAIClient
+    import os
+    from openai import AzureOpenAI
 
-    client = OpenAIClient(api_key="<Your_API_Key>")
-    model = client.get_model("gpt-3.5-turbo")
+    client = AzureOpenAI(
+       azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT"),
+       api_key = os.getenv("AZURE_OPENAI_API_KEY"),
+       api_version = os.getenv("AZURE_OPENAI_API_VERSION")
+    )
      ```
 
-1. 在新单元格中，运行以下代码来初始化 MLflow 跟踪：     
+1. 在新单元格中，运行以下代码来初始化 MLflow 跟踪并记录模型：     
 
      ```python
     import mlflow
+    from openai import AzureOpenAI
 
-    mlflow.set_tracking_uri("databricks")
-    mlflow.start_run()
-     ```
+    system_prompt = "Assistant is a large language model trained by OpenAI."
 
-1. 在新单元格中，运行以下代码来记录模型：
+    mlflow.openai.autolog()
 
-     ```python
-    mlflow.pyfunc.log_model("model", python_model=model)
+    with mlflow.start_run():
+
+        response = client.chat.completions.create(
+            model="gpt-35-turbo",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": "Tell me a joke about animals."},
+            ],
+        )
+
+        print(response.choices[0].message.content)
+        mlflow.log_param("completion_tokens", response.usage.completion_tokens)
     mlflow.end_run()
      ```
 
-## 部署模型
-
-1. 创建新笔记本并在第一个单元格中运行以下代码，从而为模型创建 REST API：
-
-     ```python
-    from flask import Flask, request, jsonify
-    import mlflow.pyfunc
-
-    app = Flask(__name__)
-
-    @app.route('/predict', methods=['POST'])
-    def predict():
-        data = request.json
-        model = mlflow.pyfunc.load_model("model")
-        prediction = model.predict(data["input"])
-        return jsonify(prediction)
-
-    if __name__ == '__main__':
-        app.run(host='0.0.0.0', port=5000)
-     ```
+上面的单元格将在工作区中启动试验，并注册每个聊天完成迭代的跟踪，跟踪每个运行的输入、输出和元数据。
 
 ## 监视模型
 
-1. 在第一个笔记本中，创建新单元格并运行以下代码来启用 MLflow 自动记录：
+1. 在左侧边栏中，选择“**试验**”，然后选择与用于本练习的笔记本关联的实验。 选择最新的运行并在“概述”页中验证是否有一个记录的参数：`completion_tokens`。 此命令 `mlflow.openai.autolog()` 将默认记录每个运行的跟踪，但也可以使用 `mlflow.log_param()` 记录其他参数，以便稍后使用该参数监视模型。
 
-     ```python
-    mlflow.autolog()
-     ```
+1. 选择“**跟踪**”选项卡，然后选择最后创建的跟踪选项卡。 验证 `completion_tokens` 参数是否为跟踪输出的一部分：
 
-1. 在新单元格中，运行以下代码来跟踪预测和输入数据。
+   ![MLFlow 跟踪 UI](./images/trace-ui.png)  
 
-     ```python
-    mlflow.log_param("input", data["input"])
-    mlflow.log_metric("prediction", prediction)
-     ```
-
-1. 在新单元格中，运行以下代码来监控数据偏移：
-
-     ```python
-    import pandas as pd
-    from evidently.dashboard import Dashboard
-    from evidently.tabs import DataDriftTab
-
-    report = Dashboard(tabs=[DataDriftTab()])
-    report.calculate(reference_data=historical_data, current_data=current_data)
-    report.show()
-     ```
-
-开始监控模型后，可以根据数据偏移检测设置自动重新训练管道。
+开始监视模型后，可以比较不同运行中的跟踪以检测数据偏移。 在一段时间内查找输入数据分布、模型预测或性能指标的重大更改。 可以使用统计测试或可视化工具来帮助进行此分析。
 
 ## 清理
 
