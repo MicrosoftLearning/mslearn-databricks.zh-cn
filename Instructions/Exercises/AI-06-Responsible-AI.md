@@ -152,7 +152,15 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 1. 在新单元格中，运行以下代码来为示例输入生成输出：
 
      ```python
-    system_prompt = "You are an advanced language model designed to assist with a variety of tasks. Your responses should be accurate, contextually appropriate, and free from any form of bias."
+    import os
+    from openai import AzureOpenAI
+
+    client = AzureOpenAI(
+        azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT"),
+        api_key = os.getenv("AZURE_OPENAI_API_KEY"),
+        api_version = os.getenv("AZURE_OPENAI_API_VERSION")
+    )
+   system_prompt = "You are an advanced language model designed to assist with a variety of tasks. Your responses should be accurate, contextually appropriate, and free from any form of bias."
 
     neutral_answers=[]
     loaded_answers=[]
