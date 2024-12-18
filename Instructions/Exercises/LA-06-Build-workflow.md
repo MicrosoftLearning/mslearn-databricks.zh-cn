@@ -9,6 +9,8 @@ Azure Databricks Workflows 提供了一个可靠的平台，用于高效部署�
 
 完成本实验室大约需要 40 分钟。
 
+> **备注**：Azure Databricks 用户界面可能会不断改进。 自编写本练习中的说明以来，用户界面可能已更改。
+
 ## 预配 Azure Databricks 工作区
 
 > **提示**：如果你已有 Azure Databricks 工作区，则可以跳过此过程并使用现有工作区。
@@ -16,14 +18,13 @@ Azure Databricks Workflows 提供了一个可靠的平台，用于高效部署�
 本练习包括一个用于预配新 Azure Databricks 工作区的脚本。 该脚本会尝试在一个区域中创建*高级*层 Azure Databricks 工作区资源，在该区域中，Azure 订阅具有本练习所需计算核心的充足配额；该脚本假设你的用户帐户在订阅中具有足够的权限来创建 Azure Databricks 工作区资源。 如果脚本由于配额或权限不足失败，可以尝试 [在 Azure 门户中以交互方式创建 Azure Databricks 工作区](https://learn.microsoft.com/azure/databricks/getting-started/#--create-an-azure-databricks-workspace)。
 
 1. 在 Web 浏览器中，登录到 [Azure 门户](https://portal.azure.com)，网址为 `https://portal.azure.com`。
-
-2. 使用页面顶部搜索栏右侧的 [\>_] 按钮在 Azure 门户中创建新的 Cloud Shell，在出现提示时选择“PowerShell”环境并创建存储。 Cloud Shell 在 Azure 门户底部的窗格中提供命令行界面，如下所示：
+2. 使用页面顶部搜索栏右侧的 **[\>_]** 按钮在 Azure 门户中创建新的 Cloud Shell，选择 ***PowerShell*** 环境。 Cloud Shell 在 Azure 门户底部的窗格中提供命令行界面，如下所示：
 
     ![具有 Cloud Shell 窗格的 Azure 门户](./images/cloud-shell.png)
 
-    > **注意**：如果以前创建了使用 Bash 环境的 Cloud Shell，请使用 Cloud Shell 窗格左上角的下拉菜单将其更改为 PowerShell********。
+    > **备注**：如果以前创建了使用 *Bash* 环境的 Cloud Shell，请将其切换到 ***PowerShell***。
 
-3. 请注意，可以通过拖动窗格顶部的分隔条或使用窗格右上角的 &#8212;、&#9723; 或 X 图标来调整 Cloud Shell 的大小，以最小化、最大化和关闭窗格  。 有关如何使用 Azure Cloud Shell 的详细信息，请参阅 [Azure Cloud Shell 文档](https://docs.microsoft.com/azure/cloud-shell/overview)。
+3. 请注意，可以通过拖动窗格顶部的分隔条来调整 Cloud Shell 的大小，或使用窗格右上角的 **&#8212;**、**&#10530;** 和 **X** 图标来最小化、最大化和关闭窗格。 有关如何使用 Azure Cloud Shell 的详细信息，请参阅 [Azure Cloud Shell 文档](https://docs.microsoft.com/azure/cloud-shell/overview)。
 
 4. 在 PowerShell 窗格中，输入以下命令以克隆此存储库：
 
@@ -40,7 +41,7 @@ Azure Databricks Workflows 提供了一个可靠的平台，用于高效部署�
 
 6. 如果出现提示，请选择要使用的订阅（仅当有权访问多个 Azure 订阅时才会发生这种情况）。
 
-7. 等待脚本完成 - 这通常需要大约 5 分钟，但在某些情况下可能需要更长的时间。 在等待时，请查看 Azure Databricks 文档中的 [Delta Lake 简介](https://docs.microsoft.com/azure/databricks/delta/delta-intro)一文。
+7. 等待脚本完成 - 这通常需要大约 5 分钟，但在某些情况下可能需要更长的时间。 在等待期间，请查看 Azure Databricks 文档中的[安排和协调工作流](https://learn.microsoft.com/azure/databricks/jobs/)文章。
 
 ## 创建群集
 
@@ -56,7 +57,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
     > 提示：使用 Databricks 工作区门户时，可能会显示各种提示和通知。 消除这些内容，并按照提供的说明完成本练习中的任务。
 
-1. 在左侧边栏中，选择“**(+) 新建**”任务，然后选择“**群集**”。
+1. 在左侧边栏中，选择“**(+)新建**”任务，然后选择“**群集**”（可能需要查看“**更多**”子菜单）。
 
 1. 在“新建群集”页中，使用以下设置创建新群集：
     - 群集名称：用户名的群集（默认群集名称）
@@ -99,7 +100,9 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 2. 将默认笔记本名称 (**Untitled Notebook *[date]***) 更改为 `ETL task`，然后在“**连接**”下拉列表中选择群集（如果尚未选择）。 如果群集未运行，可能需要一分钟左右才能启动。
 
-3. 在笔记本的第一个单元中，输入以下代码，该代码定义数据的架构并在数据帧中加载数据集：
+    确保将笔记本的默认语言设置为 **Python**。
+
+3. 在笔记本的第一个单元中，输入并运行以下代码，该代码可定义数据的架构并在数据帧中加载数据集：
 
     ```python
    from pyspark.sql.types import *
@@ -119,7 +122,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
    display(df.limit(100))
     ```
 
-4. 在现有代码单元格下，使用 + 图标添加新的代码单元格****。 然后在新单元格中，输入并运行以下代码，以删除重复行并将 `null` 条目替换为正确的值：
+4. 在现有代码单元格下，使用 **+ 代码**图标添加新的代码单元格。 然后在新单元格中，输入并运行以下代码，以删除重复行并将 `null` 条目替换为正确的值：
 
      ```python
     from pyspark.sql.functions import col
@@ -136,18 +139,6 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
    display(yearlySales)
     ```
 
-6. 在结果表上方，选择 +，然后选择“可视化效果”以查看可视化效果编辑器，然后应用以下选项********：
-
-   **常规**选项卡：
-    - **可视化效果类型**：条形图
-    - **X 列**：年份
-    - **Y 列**：添加新列并选择**“计数”****。 *应用* **Sum** *聚合*。
-   
-   X 轴**** 选项卡：
-    - **量表**：分类
-
-8. 选择“保存”。
-
 ## 生成工作流
 
 Azure Databricks 可管理所有作业的任务业务流程、群集管理、监视和错误报告。 你可以立即运行作业，通过易于使用的调度系统定期运行，只要新文件到达外部位置就可以这样做；也可以连续运行以确保作业实例始终处于运行状态。
@@ -158,24 +149,23 @@ Azure Databricks 可管理所有作业的任务业务流程、群集管理、监
 
 3. 将默认作业名称 (**New job *[date]***) 更改为 `ETL job`。
 
-4. 在“任务名称”**** 字段中输入任务的名称。
+4. 使用以下设置配置任务：
+    - **任务名称**：`Run ETL task notebook`
+    - **类型**：笔记本
+    - **来源**：工作区
+    - **路径**：*选择 *ETL 任务*笔记本*。
+    - **群集**：*选择群集*
 
-5. 在“类型”下拉菜单中选择“笔记本”********。
+5. 选择“创建任务”****。
 
-6. 在“路径”**** 字段中，选择“ETL 任务”**** 笔记本。
+6. 选择“立即运行”。
 
-7. 选择“创建任务”****。
+7. 作业开始运行后，可以通过在左侧栏中选择“**作业运行**”来监控其执行情况。
 
-8. 选择“立即运行”。
+8. 作业运行成功后，可以选择它并验证其输出。
 
-9. 作业开始运行后，可以通过在左侧栏中选择“作业运行”**** 来监控其执行情况。
+此外，可以基于触发运行作业，例如，按计划运行工作流。 若要安排定期作业运行，可以打开作业任务并添加触发器。
 
-10. 作业运行成功后，可以选择它并验证其输出。
-
-此外，可以基于触发运行作业，例如，按计划运行工作流。 若要安排定期作业运行，可以打开作业任务，然后在右侧面板中选择**添加触发器**。
-
-   ![工作流任务窗格](./images/workflow-schedule.png)
-    
 ## 清理
 
 在 Azure Databricks 门户的“计算”**** 页上，选择群集，然后选择“&#9632; 停止”****，以将其关闭。
