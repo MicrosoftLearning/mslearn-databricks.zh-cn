@@ -7,40 +7,27 @@ lab:
 
 Azure Databricks 是基于 Microsoft Azure 的常用开源 Databricks 平台的一个版本。
 
-与 Azure Synapse Analytics 类似，Azure Databricks 工作区提供了一个中心点，用于管理 Azure 上的 Databricks 群集、数据和资源**。
+Azure Databricks *工作区*为管理 Azure 上的 Databricks 群集、数据和资源提供了一个中心点。
+
+在本练习中，你将预配 Azure Databricks 工作区并探索其一些核心功能。 
 
 完成此练习大约需要 **20** 分钟。
+
+> **备注**：Azure Databricks 用户界面可能会不断改进。 自编写本练习中的说明以来，用户界面可能已更改。
 
 ## 预配 Azure Databricks 工作区
 
 > **提示**：如果你已有 Azure Databricks 工作区，则可以跳过此过程并使用现有工作区。
 
-本练习包括一个用于预配新 Azure Databricks 工作区的脚本。 该脚本会尝试在一个区域中创建*高级*层 Azure Databricks 工作区资源，在该区域中，Azure 订阅具有本练习所需计算核心的充足配额；该脚本假设你的用户帐户在订阅中具有足够的权限来创建 Azure Databricks 工作区资源。 如果脚本由于配额或权限不足失败，可以尝试 [在 Azure 门户中以交互方式创建 Azure Databricks 工作区](https://learn.microsoft.com/azure/databricks/getting-started/#--create-an-azure-databricks-workspace)。
+1. 登录到 Azure 门户，地址为 ****。
+2. 请使用以下设置创建 **Azure Databricks** 资源：
+    - 订阅****：*选择 Azure 订阅*
+    - **资源组**：*创建名为 `msl-xxxxxxx`（其中“xxxxxxx”是唯一值）的新资源组*
+    - **区域**：*选择任何可用区域*
+    - **名称**：`databricks-xxxxxxx`*（其中“xxxxxxx”是唯一值）*
+    - **定价层**：*高级*或*试用版*
 
-1. 在 Web 浏览器中，登录到 [Azure 门户](https://portal.azure.com)，网址为 `https://portal.azure.com`。
-2. 使用页面顶部搜索栏右侧的 [\>_] 按钮在 Azure 门户中创建新的 Cloud Shell，在出现提示时选择“PowerShell”环境并创建存储。 Cloud Shell 在 Azure 门户底部的窗格中提供命令行界面，如下所示：
-
-    ![具有 Cloud Shell 窗格的 Azure 门户](./images/cloud-shell.png)
-
-    > **注意**：如果以前创建了使用 Bash 环境的 Cloud Shell，请使用 Cloud Shell 窗格左上角的下拉菜单将其更改为 PowerShell********。
-
-3. 请注意，可以通过拖动窗格顶部的分隔条或使用窗格右上角的 &#8212;、&#9723; 或 X 图标来调整 Cloud Shell 的大小，以最小化、最大化和关闭窗格  。 有关如何使用 Azure Cloud Shell 的详细信息，请参阅 [Azure Cloud Shell 文档](https://docs.microsoft.com/azure/cloud-shell/overview)。
-
-4. 在 PowerShell 窗格中，输入以下命令以克隆此存储库：
-
-    ```
-    rm -r mslearn-databricks -f
-    git clone https://github.com/MicrosoftLearning/mslearn-databricks
-    ```
-
-5. 克隆存储库后，请输入以下命令以运行 **setup.ps1** 脚本，以在可用区域中预配 Azure Databricks 工作区：
-
-    ```
-    ./mslearn-databricks/setup.ps1
-    ```
-
-6. 如果出现提示，请选择要使用的订阅（仅当有权访问多个 Azure 订阅时才会发生这种情况）。
-7. 等待脚本完成 - 这通常需要大约 5 分钟，但在某些情况下可能需要更长的时间。 在等待时，请查看 Azure Databricks 文档中的[什么是 Azure Databricks？](https://learn.microsoft.com/azure/databricks/introduction/)一文。
+3. 选择“**查看 + 创建**”，然后等待部署完成。 然后转到资源并启动工作区。
 
 ## 创建群集
 
@@ -48,13 +35,12 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 > **提示**：如果 Azure Databricks 工作区中已有一个具有 13.3 LTS ML 或更高运行时版本的群集，则可以使用它来完成此练习并跳过此过程。
 
-1. 在 Azure 门户中，浏览到已由脚本创建的 **msl-xxxxxxx*** 资源组（或包含现有 Azure Databricks 工作区的资源组）
-1. 选择 Azure Databricks 服务资源（如果已使用安装脚本创建，则名为 **databricks-xxxxxxx***）。
+1. 在 Azure 门户中，浏览到 **msl-*xxxxxxx*** 资源组（或包含现有 Azure Databricks 工作区的资源组）并选择 Azure Databricks 服务资源。
 1. 在工作区的“概述”**** 页中，使用“启动工作区”**** 按钮在新的浏览器标签页中打开 Azure Databricks 工作区；请在出现提示时登录。
 
     > 提示：使用 Databricks 工作区门户时，可能会显示各种提示和通知。 消除这些内容，并按照提供的说明完成本练习中的任务。
 
-1. 在左侧边栏中，选择“**(+) 新建**”任务，然后选择“**群集**”。
+1. 在左侧边栏中，选择“**(+)新建**”任务，然后选择“**群集**”（可能需要查看“**更多**”子菜单）。
 1. 在“新建群集”页中，使用以下设置创建新群集：
     - 群集名称：用户名的群集（默认群集名称）
     - **策略**：非受限
@@ -67,17 +53,17 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 1. 等待群集创建完成。 这可能需要一到两分钟时间。
 
-> 注意：如果群集无法启动，则订阅在预配 Azure Databricks 工作区的区域中的配额可能不足。 请参阅 [CPU 内核限制阻止创建群集](https://docs.microsoft.com/azure/databricks/kb/clusters/azure-core-limit)，了解详细信息。 如果发生这种情况，可以尝试删除工作区，并在其他区域创建新工作区。 可以将区域指定为设置脚本的参数，如下所示：`./mslearn-databricks/setup.ps1 eastus`
+> 注意：如果群集无法启动，则订阅在预配 Azure Databricks 工作区的区域中的配额可能不足。 请参阅 [CPU 内核限制阻止创建群集](https://docs.microsoft.com/azure/databricks/kb/clusters/azure-core-limit)，了解详细信息。 如果发生这种情况，可以尝试删除工作区，并在其他区域创建新工作区。
 
 ## 使用 Spark 分析数据
 
 与许多 Spark 环境一样，Databricks 支持使用笔记本来合并笔记和交互式代码单元格，可用于探索数据。
 
 1. 将 [**products.csv**](https://raw.githubusercontent.com/MicrosoftLearning/mslearn-databricks/main/data/products.csv) 文件从 `https://raw.githubusercontent.com/MicrosoftLearning/mslearn-databricks/main/data/products.csv` 下载到本地计算机，并将其另存为 **products.csv**。
-1. 在边栏的“**(+) 新建**”链接菜单中，选择“**数据**”。
+1. 在边栏的“**(+)新建**”链接菜单中，选择“**添加或上传数据**”。
 1. 选择“**创建或修改表**”，并将下载的 **products.csv** 文件上传到计算机。
 1. 在“**创建或修改文件上传中的表格**”页中，确保选择页面右上角的群集。 然后选择 **hive_metastore** 目录及其默认架构以新建名为“**products**”的表格。
-1. 在创建**产品**页的“**目录资源管理器**”页中，在“**创建**”按钮菜单中，选择“**笔记本**”以创建笔记本。
+1. 创建**产品**表后，在“**目录资源管理器**”页中的“**创建**”按钮菜单中，选择“**笔记本**”以创建笔记本。
 1. 在笔记本中，确保笔记本已连接到群集，然后查看已自动添加到第一个单元格的代码，应如下所示：
 
     ```python
@@ -100,7 +86,10 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 虽然大多数数据分析师都能熟练使用上一示例中使用的 SQL 代码，但部分数据分析师和数据科学家可以在 *PySpark*（Python 的 Spark 优化版本）等编程语言中使用本机 Spark 对象（如*数据帧*）来高效处理数据。
 
-1. 在笔记本中，在先前运行的代码单元格的图表输出下，使用 **+** 图标添加新单元格。
+1. 在笔记本中，在先前运行的代码单元格的图表输出下，使用 **+ 代码**图标添加新单元格。
+
+    > **提示**：可能需要在输出单元格下移动鼠标，以使 **+ 代码**图标出现。
+
 1. 在新单元格中，输入并运行以下代码：
 
     ```python

@@ -9,6 +9,8 @@ Azure Databricks 提供了一个统一的平台，可简化从数据准备到模
 
 完成本实验室大约需要 20 分钟。
 
+> **备注**：Azure Databricks 用户界面可能会不断改进。 自编写本练习中的说明以来，用户界面可能已更改。
+
 ## 开始之前
 
 需要一个你在其中具有管理级权限的 [Azure 订阅](https://azure.microsoft.com/free)。

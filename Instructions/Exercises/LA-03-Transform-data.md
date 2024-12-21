@@ -5,13 +5,13 @@ lab:
 
 # 在 Azure Databricks 中使用 Apache Spark 转换数据
 
-Azure Databricks 是基于 Microsoft Azure 的常用开源 Databricks 平台的一个版本。 
-
-Azure Databricks 基于 Apache Spark 构建，为涉及处理文件中数据的数据工程和分析任务提供了高度可缩放的解决方案。
+Azure Databricks 是基于 Microsoft Azure 的常用开源 Databricks 平台的一个版本。 Azure Databricks 基于 Apache Spark 构建，为涉及处理文件中数据的数据工程和分析任务提供了高度可缩放的解决方案。
 
 Azure Databricks 中的常见数据转换任务包括数据清理、执行聚合和类型转换。 这些转换对于准备数据进行分析至关重要，并且是较大的 ETL（提取、转换、加载）流程的一部分。
 
 完成此练习大约需要 30 分钟。
+
+> **备注**：Azure Databricks 用户界面可能会不断改进。 自编写本练习中的说明以来，用户界面可能已更改。
 
 ## 预配 Azure Databricks 工作区
 
@@ -20,13 +20,13 @@ Azure Databricks 中的常见数据转换任务包括数据清理、执行聚合
 本练习包括一个用于预配新 Azure Databricks 工作区的脚本。 该脚本会尝试在一个区域中创建*高级*层 Azure Databricks 工作区资源，在该区域中，Azure 订阅具有本练习所需计算核心的充足配额；该脚本假设你的用户帐户在订阅中具有足够的权限来创建 Azure Databricks 工作区资源。 如果脚本由于配额或权限不足失败，可以尝试 [在 Azure 门户中以交互方式创建 Azure Databricks 工作区](https://learn.microsoft.com/azure/databricks/getting-started/#--create-an-azure-databricks-workspace)。
 
 1. 在 Web 浏览器中，登录到 [Azure 门户](https://portal.azure.com)，网址为 `https://portal.azure.com`。
-2. 使用页面顶部搜索栏右侧的 [\>_] 按钮在 Azure 门户中创建新的 Cloud Shell，在出现提示时选择“PowerShell”环境并创建存储。 Cloud Shell 在 Azure 门户底部的窗格中提供命令行界面，如下所示：
+2. 使用页面顶部搜索栏右侧的 **[\>_]** 按钮在 Azure 门户中创建新的 Cloud Shell，选择 ***PowerShell*** 环境。 Cloud Shell 在 Azure 门户底部的窗格中提供命令行界面，如下所示：
 
     ![具有 Cloud Shell 窗格的 Azure 门户](./images/cloud-shell.png)
 
-    > **注意**：如果以前创建了使用 Bash 环境的 Cloud Shell，请使用 Cloud Shell 窗格左上角的下拉菜单将其更改为 PowerShell********。
+    > **备注**：如果以前创建了使用 *Bash* 环境的 Cloud Shell，请将其切换到 ***PowerShell***。
 
-3. 请注意，可以通过拖动窗格顶部的分隔条或使用窗格右上角的 &#8212;、&#9723; 或 X 图标来调整 Cloud Shell 的大小，以最小化、最大化和关闭窗格  。 有关如何使用 Azure Cloud Shell 的详细信息，请参阅 [Azure Cloud Shell 文档](https://docs.microsoft.com/azure/cloud-shell/overview)。
+3. 请注意，可以通过拖动窗格顶部的分隔条来调整 Cloud Shell 的大小，或使用窗格右上角的 **&#8212;**、**&#10530;** 和 **X** 图标来最小化、最大化和关闭窗格。 有关如何使用 Azure Cloud Shell 的详细信息，请参阅 [Azure Cloud Shell 文档](https://docs.microsoft.com/azure/cloud-shell/overview)。
 
 4. 在 PowerShell 窗格中，输入以下命令以克隆此存储库：
 
@@ -56,7 +56,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
     > 提示：使用 Databricks 工作区门户时，可能会显示各种提示和通知。 消除这些内容，并按照提供的说明完成本练习中的任务。
 
-4. 在左侧边栏中，选择“**(+) 新建**”任务，然后选择“**群集**”。
+4. 在左侧边栏中，选择“**(+)新建**”任务，然后选择“**群集**”（可能需要查看“**更多**”子菜单）。
 5. 在“新建群集”页中，使用以下设置创建新群集：
     - 群集名称：用户名的群集（默认群集名称）
     - **策略**：非受限
@@ -91,7 +91,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
      ```
 
 2. 使用单元格左侧的“&#9656; 运行单元格”菜单选项来运行该代码****。 然后等待代码运行的 Spark 作业完成。
-3. 添加新的代码单元，并使用它来运行以下代码，这会定义数据的架构：
+3. 在输出下，使用 **+ 代码**图标添加新的代码单元格，并使用它来运行以下定义数据架构的代码：
 
     ```python
    from pyspark.sql.types import *
@@ -115,15 +115,14 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 请注意，此数据集在“税款”**** 列中具有一些重复的行和 `null` 值。 因此，在进一步处理和分析数据之前，需要执行清理步骤。
 
-![包含要清理的数据的表。](./images/data-cleaning.png)
-
-1. 在现有代码单元格下，使用 + 图标添加新的代码单元格****。 然后在新单元格中输入并运行以下代码，以删除表中的重复行，并将 `null` 条目替换为正确的值：
+1. 添加一个新代码单元格。 然后在新单元格中输入并运行以下代码，以删除表中的重复行，并将 `null` 条目替换为正确的值：
 
     ```python
     from pyspark.sql.functions import col
     df = df.dropDuplicates()
     df = df.withColumn('Tax', col('UnitPrice') * 0.08)
     df = df.withColumn('Tax', col('Tax').cast("float"))
+    display(df.limit(100))
     ```
 
 请注意，更新“税款”**** 列中的值后，其数据类型将再次设置为 `float`。 这是因为其数据类型在执行计算后更改为 `double`。 由于 `double` 内存使用量高于 `float`，因此为了提高性能，最好将列类型转换回 `float`。

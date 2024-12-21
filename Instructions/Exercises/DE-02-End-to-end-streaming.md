@@ -9,6 +9,8 @@ lab:
 
 完成本实验室大约需要 30 分钟。
 
+> **备注**：Azure Databricks 用户界面可能会不断改进。 自编写本练习中的说明以来，用户界面可能已更改。
+
 ## 预配 Azure Databricks 工作区
 
 > **提示**：如果你已有 Azure Databricks 工作区，则可以跳过此过程并使用现有工作区。
@@ -16,14 +18,13 @@ lab:
 本练习包括一个用于预配新 Azure Databricks 工作区的脚本。 该脚本会尝试在一个区域中创建*高级*层 Azure Databricks 工作区资源，在该区域中，Azure 订阅具有本练习所需计算核心的充足配额；该脚本假设你的用户帐户在订阅中具有足够的权限来创建 Azure Databricks 工作区资源。 如果脚本由于配额或权限不足失败，可以尝试 [在 Azure 门户中以交互方式创建 Azure Databricks 工作区](https://learn.microsoft.com/azure/databricks/getting-started/#--create-an-azure-databricks-workspace)。
 
 1. 在 Web 浏览器中，登录到 [Azure 门户](https://portal.azure.com)，网址为 `https://portal.azure.com`。
-
-2. 使用页面顶部搜索栏右侧的 [\>_] 按钮在 Azure 门户中创建新的 Cloud Shell，在出现提示时选择“PowerShell”环境并创建存储。 Cloud Shell 在 Azure 门户底部的窗格中提供命令行界面，如下所示：
+2. 使用页面顶部搜索栏右侧的 **[\>_]** 按钮在 Azure 门户中创建新的 Cloud Shell，选择 ***PowerShell*** 环境。 Cloud Shell 在 Azure 门户底部的窗格中提供命令行界面，如下所示：
 
     ![具有 Cloud Shell 窗格的 Azure 门户](./images/cloud-shell.png)
 
-    > 注意：如果以前创建了使用 Bash 环境的 Cloud shell，请使用 Cloud Shell 窗格左上角的下拉菜单将其更改为“PowerShell”。
+    > **备注**：如果以前创建了使用 *Bash* 环境的 Cloud Shell，请将其切换到 ***PowerShell***。
 
-3. 请注意，可以通过拖动窗格顶部的分隔条或使用窗格右上角的 &#8212;、&#9723; 或 X 图标来调整 Cloud Shell 的大小，以最小化、最大化和关闭窗格  。 有关如何使用 Azure Cloud Shell 的详细信息，请参阅 [Azure Cloud Shell 文档](https://docs.microsoft.com/azure/cloud-shell/overview)。
+3. 请注意，可以通过拖动窗格顶部的分隔条来调整 Cloud Shell 的大小或使用窗格右上角的 **&#8212;**、**&#10530;** 或 **X** 图标来最小化、最大化和关闭窗格。 有关如何使用 Azure Cloud Shell 的详细信息，请参阅 [Azure Cloud Shell 文档](https://docs.microsoft.com/azure/cloud-shell/overview)。
 
 4. 在 PowerShell 窗格中，输入以下命令以克隆此存储库：
 
@@ -56,7 +57,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
     > 提示：使用 Databricks 工作区门户时，可能会显示各种提示和通知。 消除这些内容，并按照提供的说明完成本练习中的任务。
 
-1. 在左侧边栏中，选择“**(+) 新建**”任务，然后选择“**群集**”。
+1. 在左侧边栏中，选择“**(+)新建**”任务，然后选择“**群集**”（可能需要查看“**更多**”子菜单）。
 
 1. 在“新建群集”页中，使用以下设置创建新群集：
     - 群集名称：用户名的群集（默认群集名称）
@@ -75,6 +76,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 ## 创建笔记本并引入数据
 
 1. 在边栏中，使用“(+) 新建”**** 链接创建**笔记本**。 在“连接”**** 下拉列表中，选择群集（如果尚未选择）。 如果群集未运行，可能需要一分钟左右才能启动。
+2. 将默认笔记本名称（**无标题笔记本*[日期]***）更改为**增量实时表引入**。
 
 3. 在笔记本的第一个单元格中输入以下代码，该代码使用 *shell* 命令将数据文件从 GitHub 下载到群集使用的文件系统中。
 
@@ -131,20 +133,21 @@ Delta Lake 支持流式处理数据。** Delta 表可以是接收器，也可以
 1. 在左侧边栏中选择“增量实时表”**** ，然后选择“创建管道”****。
 
 2. 在“创建管道”**** 页中，使用以下设置创建新管道：
-    - **管道名称**：设置管道的名称
+    - **管道名称**：`Ingestion Pipeline`
     - **产品版本**：高级
     - **管道模式**：触发
-    - **源代码**：将其留空
+    - **源代码**：*留空*
     - **存储选项**：Hive 元存储
-    - **存储位置**：dbfs:/pipelines/device_stream
+    - **存储位置**：`dbfs:/pipelines/device_stream`
+    - **目标架构**：`default`
 
-3. 选择**创建**。
+3. 选择“**创建**”以创建管道（这也将为管道代码创建空白笔记本）。
 
-4. 创建管道后，在右侧面板中的“源代码”**** 下，打开指向空白笔记本的链接：
+4. 创建管道后，打开右侧面板中“**源代码**”下的空白笔记本链接： 这将在新浏览器选项卡中打开笔记本：
 
     ![delta-live-table-pipeline](./images/delta-live-table-pipeline.png)
 
-5. 在笔记本的第一个单元中，输入以下代码以创建“增量实时表”并转换数据：
+5. 在空白笔记本的第一个单元格中，输入（但不要运行）以下代码，以创建“增量实时表”并转换数据：
 
      ```python
     import dlt
@@ -170,12 +173,13 @@ Delta Lake 支持流式处理数据。** Delta 表可以是接收器，也可以
         )
      ```
 
-6. 选择**开始**。
+6. 关闭包含笔记本的浏览器选项卡（内容会自动保存），然后返回到管道。 然后选择“开始”****。
 
-7. 成功执行管道后，返回到第一个笔记本，并使用以下代码验证是否已在指定的存储位置创建新表：
+7. 在管道成功完成后，返回到你之前首先创建的最近的 **增量实时表引入**，并在一个新的单元格中运行以下代码，以验证新表是否已在指定的存储位置创建：
 
      ```sql
-    display(dbutils.fs.ls("dbfs:/pipelines/device_stream/tables"))
+    %sql
+    SHOW TABLES
      ```
 
 ## 以可视化效果的形式查看结果
@@ -185,8 +189,8 @@ Delta Lake 支持流式处理数据。** Delta 表可以是接收器，也可以
 1. 在第一个笔记本中，添加新的代码单元并运行以下代码，将 `transformed_iot_data` 加载到数据帧中：
 
     ```python
-   df = spark.read.format("delta").load('/pipelines/device_stream/tables/transformed_iot_data')
-   display(df)
+    %sql
+    SELECT * FROM transformed_iot_data
     ```
 
 1. 在结果表上方，选择 +，然后选择“可视化效果”以查看可视化效果编辑器，然后应用以下选项********：
@@ -195,6 +199,12 @@ Delta Lake 支持流式处理数据。** Delta 表可以是接收器，也可以
     - **Y 列**：*添加新列并选择*“temperature_fahrenheit”****。 *应用* **Sum** *聚合*。
 
 1. 保存可视化效果，然后查看笔记本中生成的图表。
+1. 添加新的代码单元格，并输入以下代码以停止流式处理查询：
+
+    ```python
+    query.stop()
+    ```
+    
 
 ## 清理
 

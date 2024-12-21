@@ -9,6 +9,8 @@ lab:
 
 完成本实验室大约需要 30 分钟。
 
+> **备注**：Azure Databricks 用户界面可能会不断改进。 自编写本练习中的说明以来，用户界面可能已更改。
+
 ## 预配 Azure Databricks 工作区
 
 > **提示**：如果你已有 Azure Databricks 工作区，则可以跳过此过程并使用现有工作区。
@@ -16,14 +18,13 @@ lab:
 本练习包括一个用于预配新 Azure Databricks 工作区的脚本。 该脚本会尝试在一个区域中创建*高级*层 Azure Databricks 工作区资源，在该区域中，Azure 订阅具有本练习所需计算核心的充足配额；该脚本假设你的用户帐户在订阅中具有足够的权限来创建 Azure Databricks 工作区资源。 如果脚本由于配额或权限不足失败，可以尝试 [在 Azure 门户中以交互方式创建 Azure Databricks 工作区](https://learn.microsoft.com/azure/databricks/getting-started/#--create-an-azure-databricks-workspace)。
 
 1. 在 Web 浏览器中，登录到 [Azure 门户](https://portal.azure.com)，网址为 `https://portal.azure.com`。
-
-2. 使用页面顶部搜索栏右侧的 [\>_] 按钮在 Azure 门户中创建新的 Cloud Shell，在出现提示时选择“PowerShell”环境并创建存储。 Cloud Shell 在 Azure 门户底部的窗格中提供命令行界面，如下所示：
+2. 使用页面顶部搜索栏右侧的 **[\>_]** 按钮在 Azure 门户中创建新的 Cloud Shell，选择 ***PowerShell*** 环境。 Cloud Shell 在 Azure 门户底部的窗格中提供命令行界面，如下所示：
 
     ![具有 Cloud Shell 窗格的 Azure 门户](./images/cloud-shell.png)
 
-    > 注意：如果以前创建了使用 Bash 环境的 Cloud shell，请使用 Cloud Shell 窗格左上角的下拉菜单将其更改为“PowerShell”。
+    > **备注**：如果以前创建了使用 *Bash* 环境的 Cloud Shell，请将其切换到 ***PowerShell***。
 
-3. 请注意，可以通过拖动窗格顶部的分隔条或使用窗格右上角的 &#8212;、&#9723; 或 X 图标来调整 Cloud Shell 的大小，以最小化、最大化和关闭窗格  。 有关如何使用 Azure Cloud Shell 的详细信息，请参阅 [Azure Cloud Shell 文档](https://docs.microsoft.com/azure/cloud-shell/overview)。
+3. 请注意，可以通过拖动窗格顶部的分隔条来调整 Cloud Shell 的大小或使用窗格右上角的 **&#8212;**、**&#10530;** 或 **X** 图标来最小化、最大化和关闭窗格。 有关如何使用 Azure Cloud Shell 的详细信息，请参阅 [Azure Cloud Shell 文档](https://docs.microsoft.com/azure/cloud-shell/overview)。
 
 4. 在 PowerShell 窗格中，输入以下命令以克隆此存储库：
 
@@ -56,7 +57,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
     > 提示：使用 Databricks 工作区门户时，可能会显示各种提示和通知。 消除这些内容，并按照提供的说明完成本练习中的任务。
 
-1. 在左侧边栏中，选择“**(+) 新建**”任务，然后选择“**群集**”。
+1. 在左侧边栏中，选择“**(+)新建**”任务，然后选择“**群集**”（可能需要查看“**更多**”子菜单）。
 
 1. 在“新建群集”页中，使用以下设置创建新群集：
     - 群集名称：用户名的群集（默认群集名称）
@@ -74,7 +75,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 ## 创建笔记本并引入数据
 
-1. 在边栏中，使用“(+) 新建”**** 链接创建**笔记本**。 在“连接”**** 下拉列表中，选择群集（如果尚未选择）。 如果群集未运行，可能需要一分钟左右才能启动。
+1. 在边栏中，使用“**(+)新建**”链接来创建**笔记本**，并将默认笔记本名称（**无标题笔记本*[日期]***）更改为**优化数据引入**。 然后，在“**连接**”下拉列表中，选择群集（如果尚未选择）。 如果群集未运行，可能需要一分钟左右才能启动。
 
 2. 在笔记本的第一个单元格中输入以下代码，该代码使用 *shell* 命令将数据文件从 GitHub 下载到群集使用的文件系统中。
 
@@ -85,7 +86,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
     wget -O /dbfs/nyc_taxi_trips/yellow_tripdata_2021-01.parquet https://github.com/MicrosoftLearning/mslearn-databricks/raw/main/data/yellow_tripdata_2021-01.parquet
      ```
 
-3. 在新单元格中，输入以下代码，将数据集加载到数据帧中：
+3. 在第一个单元格的输出下，使用 **+ 代码**图标添加新单元格，并在其中运行以下代码，以将数据集加载到数据帧中：
    
      ```python
     # Load the dataset into a DataFrame
@@ -125,17 +126,13 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
     wget -O /dbfs/nyc_taxi_trips/yellow_tripdata_2021-02_edited.parquet https://github.com/MicrosoftLearning/mslearn-databricks/raw/main/data/yellow_tripdata_2021-02_edited.parquet
      ```
    
-新文件新增一列，因此流会停止并出现 `UnknownFieldException` 错误。 在流引发此错误之前，自动加载程序会在最新的数据微批上执行架构推理，并通过将新列合并到架构末尾来使用最新架构更新架构位置。 现有列的数据类型将保持不变。
+    新文件新增一列，因此流会停止并出现 `UnknownFieldException` 错误。 在流引发此错误之前，自动加载程序会在最新的数据微批上执行架构推理，并通过将新列合并到架构末尾来使用最新架构更新架构位置。 现有列的数据类型将保持不变。
 
-3. 再次运行流式处理代码单元，并验证是否已将两个新列添加到表中：
-
-   ![包含新列的增量表](./images/autoloader-new-columns.png)
-   
-> 注意：`_rescued_data` 列包含因类型不匹配、大小写不匹配或架构中缺少列而未分析的任何数据。
+3. 再次运行流式处理代码单元格，并验证是否已将两个新列（**new_column** 和 *_rescued_data**）添加到表中： **_rescued_data** 列包含因类型不匹配、大小写不匹配或架构中缺少列而未分析的任何数据。
 
 4. 选择“中断”**** 以停止数据流式处理。
    
-以 Delta 表形式写入流式处理数据。 Delta Lake 为传统 Parquet 文件提供了一系列增强功能，包括 ACID 事务、架构演变、按时间顺序查看以及统一流式数据处理和批量数据处理，使其成为管理大数据工作的强大解决方案。
+    以 Delta 表形式写入流式处理数据。 Delta Lake 为传统 Parquet 文件提供了一系列增强功能，包括 ACID 事务、架构演变、按时间顺序查看以及统一流式数据处理和批量数据处理，使其成为管理大数据工作的强大解决方案。
 
 ## 数据转换优化
 
