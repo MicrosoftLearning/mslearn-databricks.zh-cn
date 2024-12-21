@@ -11,7 +11,7 @@ lab:
 
 > **备注**：Azure Databricks 用户界面可能会不断改进。 自编写本练习中的说明以来，用户界面可能已更改。
 
->**备注：** 需要 Github 帐户才能完成本练习。
+> **备注：** 要完成本练习，需要 GitHub 帐户并在本地计算机上安装 Git 客户端（例如 Git 命令行工具）。
 
 ## 预配 Azure Databricks 工作区
 
@@ -43,7 +43,7 @@ lab:
 
 6. 如果出现提示，请选择要使用的订阅（仅当有权访问多个 Azure 订阅时才会发生这种情况）。
 
-7. 等待脚本完成 - 这通常需要大约 5 分钟，但在某些情况下可能需要更长的时间。 在等待时，请查看 Azure Databricks 文档中的 [Delta Lake 简介](https://docs.microsoft.com/azure/databricks/delta/delta-intro)一文。
+7. 等待脚本完成 - 这通常需要大约 5 分钟，但在某些情况下可能需要更长的时间。 在等待期间，请查看 Azure Databricks 文档中的[使用 Databricks 资产捆绑包和 GitHub Actions 运行 CI/CD 工作流](https://learn.microsoft.com/azure/databricks/dev-tools/bundles/ci-cd-bundles)一文。
 
 ## 创建群集
 
@@ -59,7 +59,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
     > 提示：使用 Databricks 工作区门户时，可能会显示各种提示和通知。 消除这些内容，并按照提供的说明完成本练习中的任务。
 
-1. 在左侧边栏中，选择“**(+) 新建**”任务，然后选择“**群集**”。
+1. 在左侧边栏中，选择“**(+)新建**”任务，然后选择“**群集**”（可能需要查看“**更多**”子菜单）。
 
 1. 在“新建群集”页中，使用以下设置创建新群集：
     - 群集名称：用户名的群集（默认群集名称）
@@ -77,9 +77,9 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 ## 创建笔记本并引入数据
 
-1. 在边栏中，使用“(+) 新建”**** 链接创建**笔记本**。 在“连接”**** 下拉列表中，选择群集（如果尚未选择）。 如果群集未运行，可能需要一分钟左右才能启动。
+1. 在边栏中，使用“**(+)新建**”链接来创建**笔记本**，并将默认笔记本名称（**无标题笔记本*[日期]***）更改为 **CICD 笔记本**。 然后，在“**连接**”下拉列表中，选择群集（如果尚未选择）。 如果群集未运行，可能需要一分钟左右才能启动。
 
-2. 在笔记本的第一个单元格中输入以下代码，该代码使用 *shell* 命令将数据文件从 GitHub 下载到群集使用的文件系统中。
+1. 在笔记本的第一个单元格中输入以下代码，该代码使用 *shell* 命令将数据文件从 GitHub 下载到群集使用的文件系统中。
 
      ```python
     %sh
@@ -88,22 +88,22 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
     wget -O /dbfs/FileStore/sample_sales.csv https://github.com/MicrosoftLearning/mslearn-databricks/raw/main/data/sample_sales.csv
      ```
 
-3. 使用单元格左侧的“&#9656; 运行单元格”菜单选项来运行该代码****。 然后等待代码运行的 Spark 作业完成。
+1. 使用单元格左侧的“&#9656; 运行单元格”菜单选项来运行该代码****。 然后等待代码运行的 Spark 作业完成。
    
 ## 设置 Github 存储库
 
 将 GitHub 存储库连接到 Azure Databricks 工作区后，可以在 GitHub Actions 中设置 CI/CD 管道，对存储库所做的任何更改都会触发这些管道。
 
-1. 转到 GitHub 帐户[](https://github.com/)，为项目创建新存储库。
+1. 转到 [GitHub 帐户](https://github.com/)，并使用合适的名称创建一个新的专用存储库（例如 *databricks-cicd-repo*）。
 
-2. 使用 `git clone` 将存储库克隆到本地计算机。
+1. 使用 [git clone](https://git-scm.com/docs/git-clone) 命令将空存储库克隆到本地计算机。
 
-3. 将本练习所需的文件下载到本地存储库：
+1. 将本练习所需的文件下载到存储库的本地文件夹：
    - [CSV 文件](https://github.com/MicrosoftLearning/mslearn-databricks/raw/main/data/sample_sales.csv)
    - [Databricks Notebook](https://github.com/MicrosoftLearning/mslearn-databricks/raw/main/data/sample_sales_notebook.dbc)
    - [作业配置文件](https://github.com/MicrosoftLearning/mslearn-databricks/raw/main/data/job-config.json)
 
-   提交并推送更改。
+1. 在本地 Git 存储库克隆中，[添加](https://git-scm.com/docs/git-add)这些文件。 现在，[提交](https://git-scm.com/docs/git-commit)更改并将其[推送](https://git-scm.com/docs/git-push)到存储库。
 
 ## 设置存储库密码
 
@@ -113,23 +113,21 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 在创建存储库密码之前，需要在 Azure Databricks 中生成个人访问令牌：
 
-1. 在 Azure Databricks 工作区中，在顶部栏中选择 Azure Databricks 用户名，然后从下拉列表中选择“**设置**”。
+1. 在 Azure Databricks 工作区中，选择顶部栏中的*用户*图标，然后从下拉列表中选择“**设置**”。
 
-2. 选择“**开发人员**”。
+2. 在“**开发人员**”页上，选择“**访问令牌**”旁边的“**管理**”。
 
-3. 然后选择“**访问令牌**”旁边的“**管理**”。
+3. 选择“**生成新令牌**”，然后选择“**生成**”。
 
-4. 选择“**生成新令牌**”，然后选择“**生成**”。
+4. 复制显示的令牌并将其粘贴到稍后可引用的某个位置。 然后选择“完成”。
 
-5. 将显示的令牌复制到安全位置，然后选择“**完成**”。
-
-6. 现在，在存储库页中，选择“**设置**”选项卡。
+5. 现在，在 GitHub 存储库页中，选择“**设置**”选项卡。
 
    ![GitHub 设置选项卡](./images/github-settings.png)
 
-7. 在左侧边栏中，选择“**密码和变量**”，然后选择“**操作**”。
+6. 在左侧边栏中，选择“**密码和变量**”，然后选择“**操作**”。
 
-8. 选择“**新增存储库密码**”，然后添加以下每个变量：
+7. 选择“**新增存储库密码**”，然后添加以下每个变量：
    - **名称：** DATABRICKS_HOST **密码：** 添加 Databricks 工作区的 URL。
    - **名称：** DATABRICKS_TOKEN **密码：** 添加之前生成的访问令牌。
 
@@ -182,21 +180,21 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
           run: databricks fs cp dbfs:/FileStore/sample_sales.csv . --overwrite
      ```
 
-此代码将安装和配置 Databricks CLI，并在每次推送提交或合并拉取请求时，将示例数据下载到存储库。
+    此代码将安装和配置 Databricks CLI，并在每次推送提交或合并拉取请求时，将示例数据下载到存储库。
 
-3. 为工作流 **CI 管道**命名，然后选择“**提交更改**”。 管道将自动运行，可以在“**操作**”选项卡中检查其状态。
+3. 将工作流命名为 **CI_pipeline.yml**，然后选择“**提交更改**”。 管道将自动运行，可以在“**操作**”选项卡中检查其状态。
 
-工作流完成后，即可开始设置 CD 管道的配置。
+    工作流完成后，即可开始设置 CD 管道的配置。
 
 4. 转到工作区页，选择“**计算**”，然后选择群集。
 
 5. 在群集的页面中，选择“**更多...**”，然后选择“**查看 JSON**”。 复制群集的 ID。
 
-6. 打开存储库中的 `job-config.json` 并将 `your_cluster_id` 替换为刚刚复制的群集 ID。 此外，将 `/Workspace/Users/your_username/your_notebook` 替换为要存储管道中使用的笔记本所在工作区中的路径。 提交更改。
+6. 在存储库中，打开存储库中的 **job-config.json**，并将 *your_cluster_id* 替换为刚刚复制的群集 ID。 此外，将 */Workspace/Users/your_username/your_notebook* 替换为工作区中希望存储管道中使用的笔记本的路径。 提交更改。
 
-> **备注：** 如果转到“**操作**”选项卡，将会看到 CI 管道再次开始运行。 由于它应在每次推送提交时触发，因此更改 `job-config.json` 将按预期部署管道。
+    > **备注：** 如果转到“**操作**”选项卡，将会看到 CI 管道再次开始运行。 由于它应该在推送提交时触发，因此更改 *job-config.json* 将按预期部署管道。
 
-7. 在“**操作**”选项卡中，创建名为 **CD 管道**的新工作流，并输入以下代码：
+7. 在“**操作**”选项卡中，创建名为 **CD_pipeline.yml** 的新工作流，并输入以下代码：
 
      ```yaml
     name: CD Pipeline for Azure Databricks
@@ -229,7 +227,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
             ${{ secrets.DATABRICKS_TOKEN }}
             EOF
         - name: Upload Notebook to DBFS
-          run: databricks fs cp /path/to/your/notebook /Workspace/Users/your_username/your_notebook --overwrite
+          run: databricks fs cp sample_sales_notebook.dbc dbfs:/Workspace/Users/your_username/your_notebook --overwrite
           env:
             DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
 
@@ -241,9 +239,11 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
             DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
      ```
 
-在提交更改之前，请将 `/path/to/your/notebook` 替换为存储库中笔记本的文件路径，以及将 `/Workspace/Users/your_username/your_notebook` 替换为要在 Azure Databricks 工作区导入笔记本的文件路径。
+    在提交更改之前，请将 `/path/to/your/notebook` 替换为存储库中笔记本的文件路径，以及将 `/Workspace/Users/your_username/your_notebook` 替换为要在 Azure Databricks 工作区导入笔记本的文件路径。
 
-此代码将再次安装和配置 Databricks CLI，将笔记本导入 Databricks 文件系统，并创建和运行可在工作区的“**工作流**”页中监控的作业。 检查输出并验证数据示例是否已修改。
+8. 提交更改。
+
+    此代码将再次安装和配置 Databricks CLI，将笔记本导入 Databricks 文件系统，并创建和运行可在工作区的“**工作流**”页中监控的作业。 检查输出并验证数据示例是否已修改。
 
 ## 清理
 

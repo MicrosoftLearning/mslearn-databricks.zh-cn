@@ -45,7 +45,7 @@ Unity Catalog 为数据和 AI 提供集中管理解决方案，通过提供单�
 
 6. 如果出现提示，请选择要使用的订阅（仅当有权访问多个 Azure 订阅时才会发生这种情况）。
 
-7. 等待脚本完成 - 这通常需要大约 5 分钟，但在某些情况下可能需要更长的时间。 在等待时，请查看 Azure Databricks 文档中的 [Delta Lake 简介](https://docs.microsoft.com/azure/databricks/delta/delta-intro)一文。
+7. 等待脚本完成 - 这通常需要大约 5 分钟，但在某些情况下可能需要更长的时间。 在等待期间，请查看 Azure Databricks 文档中的[使用 Unity Catalog 进行数据管理](https://learn.microsoft.com/azure/databricks/data-governance/)一文。
 
 ## 创建群集
 
@@ -61,7 +61,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
     > 提示：使用 Databricks 工作区门户时，可能会显示各种提示和通知。 消除这些内容，并按照提供的说明完成本练习中的任务。
 
-1. 在左侧边栏中，选择“**(+) 新建**”任务，然后选择“**群集**”。
+1. 在左侧边栏中，选择“**(+)新建**”任务，然后选择“**群集**”（可能需要查看“**更多**”子菜单）。
 
 1. 在“新建群集”页中，使用以下设置创建新群集：
     - 群集名称：用户名的群集（默认群集名称）
