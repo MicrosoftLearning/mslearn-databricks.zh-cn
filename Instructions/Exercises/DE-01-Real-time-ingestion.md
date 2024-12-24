@@ -1,9 +1,9 @@
 ---
 lab:
-  title: 使用 Spark 结构化流式处理和 Delta Lake 和 Azure Databricks 进行实时引入和处理
+  title: 使用 Spark 结构化流式处理和 Delta Lake 以及 Azure Databricks 进行实时数据处理
 ---
 
-# 使用 Spark 结构化流式处理和 Delta Lake 和 Azure Databricks 进行实时引入和处理
+# 使用 Spark 结构化流式处理和 Delta Lake 以及 Azure Databricks 进行实时数据处理
 
 Spark 结构化流式处理允许使用端到端容错实时处理数据。 Delta Lake 通过提供具有 ACID 事务的存储层来增强这一点，从而确保数据的完整性和一致性。 可以将数据从云存储引入到 Delta Lake，并使用 Delta Live Tables 来管理和优化流数据管道。
 
@@ -24,7 +24,7 @@ Spark 结构化流式处理允许使用端到端容错实时处理数据。 Delt
 
     > **备注**：如果以前创建了使用 *Bash* 环境的 Cloud Shell，请将其切换到 ***PowerShell***。
 
-3. 请注意，可以通过拖动窗格顶部的分隔条来调整 Cloud Shell 的大小或使用窗格右上角的 **&#8212;**、**&#10530;** 或 **X** 图标来最小化、最大化和关闭窗格。 有关如何使用 Azure Cloud Shell 的详细信息，请参阅 [Azure Cloud Shell 文档](https://docs.microsoft.com/azure/cloud-shell/overview)。
+3. 请注意，可以通过拖动窗格顶部的分隔条来调整 Cloud Shell 的大小，或使用窗格右上角的 **&#8212;**、**&#10530;** 和 **X** 图标来最小化、最大化和关闭窗格。 有关如何使用 Azure Cloud Shell 的详细信息，请参阅 [Azure Cloud Shell 文档](https://docs.microsoft.com/azure/cloud-shell/overview)。
 
 4. 在 PowerShell 窗格中，输入以下命令以克隆此存储库：
 
@@ -41,7 +41,7 @@ Spark 结构化流式处理允许使用端到端容错实时处理数据。 Delt
 
 6. 如果出现提示，请选择要使用的订阅（仅当有权访问多个 Azure 订阅时才会发生这种情况）。
 
-7. 等待脚本完成 - 这通常需要大约 5 分钟，但在某些情况下可能需要更长的时间。 在等待时，请查看 Azure Databricks 文档中的 [Delta Lake 简介](https://docs.microsoft.com/azure/databricks/delta/delta-intro)一文。
+7. 等待脚本完成 - 这通常需要大约 5 分钟，但在某些情况下可能需要更长的时间。 在等待期间，请查看 Azure Databricks 文档中的[查询流式数据](https://learn.microsoft.com/azure/databricks/query/streaming)一文。
 
 ## 创建群集
 
