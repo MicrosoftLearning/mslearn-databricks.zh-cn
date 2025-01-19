@@ -23,9 +23,12 @@ Azure Databricks *工作区*为管理 Azure 上的 Databricks 群集、数据和
 2. 请使用以下设置创建 **Azure Databricks** 资源：
     - 订阅****：*选择 Azure 订阅*
     - **资源组**：*创建名为 `msl-xxxxxxx`（其中“xxxxxxx”是唯一值）的新资源组*
+    - **工作区名称**：`databricks-xxxxxxx`*（其中“xxxxxxx”是资源组名称中使用的值）*
     - **区域**：*选择任何可用区域*
-    - **名称**：`databricks-xxxxxxx`*（其中“xxxxxxx”是唯一值）*
     - **定价层**：*高级*或*试用版*
+    - **受管理资源组名称**：`databricks-xxxxxxx-managed`*（其中“xxxxxxx”是资源组名称中使用的值）*
+
+    ![Azure 门户中“创建 Azure Databricks 工作区”页面的屏幕截图。](./images/create-databricks.png)
 
 3. 选择“**查看 + 创建**”，然后等待部署完成。 然后转到资源并启动工作区。
 
