@@ -5,7 +5,7 @@ lab:
 
 # 在 Azure Databricks 中为机器学习优化超参数
 
-在本练习中，你将使用 Hyperopt**** 库在 Azure Databricks 中优化机器学习模型训练的超参数。
+在本练习中，你将使用 **Optuna** 库优化 Azure Databricks 中机器学习模型训练的超参数。
 
 完成此练习大约需要 30 分钟。
 
@@ -93,9 +93,9 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
     ```bash
     %sh
-    rm -r /dbfs/hyperopt_lab
-    mkdir /dbfs/hyperopt_lab
-    wget -O /dbfs/hyperopt_lab/penguins.csv https://raw.githubusercontent.com/MicrosoftLearning/mslearn-databricks/main/data/penguins.csv
+    rm -r /dbfs/hyperparam_tune_lab
+    mkdir /dbfs/hyperparam_tune_lab
+    wget -O /dbfs/hyperparam_tune_lab/penguins.csv https://raw.githubusercontent.com/MicrosoftLearning/mslearn-databricks/main/data/penguins.csv
     ```
 
 1. 使用单元格左侧的“&#9656; 运行单元格”菜单选项来运行该代码****。 然后等待代码运行的 Spark 作业完成。
@@ -110,7 +110,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
    from pyspark.sql.types import *
    from pyspark.sql.functions import *
    
-   data = spark.read.format("csv").option("header", "true").load("/hyperopt_lab/penguins.csv")
+   data = spark.read.format("csv").option("header", "true").load("/hyperparam_tune_lab/penguins.csv")
    data = data.dropna().select(col("Island").astype("string"),
                              col("CulmenLength").astype("float"),
                              col("CulmenDepth").astype("float"),
@@ -130,103 +130,73 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 可以通过将特征拟合为一种计算最可能标签的算法来训练机器学习模型。 算法将训练数据作为参数，并尝试计算特征和标签之间的数学关系。 除了数据之外，大多数算法还使用一个或多个超参数** 来影响关系的计算方式；确定最优超参数值是迭代模型训练过程的重要组成部分。
 
-为了帮助你确定最优超参数值，Azure Databricks 支持 Hyperopt****，该库使你能够尝试多个超参数值并找到最适合数据的组合。
+为了帮助确定最优超参数值，Azure Databricks 包含对 [**Hyperopt**](https://optuna.readthedocs.io/en/stable/index.html) 的支持，该库使你能够尝试多个超参数值并找到最适合数据的组合。
 
-使用 Hyperopt 的第一步是创建一个具有以下特点的函数：
+使用 Optuna 的第一步是创建函数，该函数：
 
 - 使用一个或多个作为参数传递给函数的超参数值来训练模型。
 - 计算可用于度量“损失”**（模型距完美预测性能的距离）的性能指标
 - 返回损失值，以便通过尝试不同的超参数值以迭代方式对损失值进行优化（最小化）
 
-1. 添加一个新单元格并使用以下代码创建一个函数，该函数使用企鹅数据训练一个分类模型，该模型根据企鹅的位置和度量来预测企鹅的种类：
+1. 添加新单元格并使用以下代码创建函数，该函数定义要用于超参数的值范围，并使用企鹅数据训练分类模型，该模型根据企鹅的位置和测量值预测企鹅的物种：
 
     ```python
-   from hyperopt import STATUS_OK
-   import mlflow
+   import optuna
+   import mlflow # if you wish to log your experiments
    from pyspark.ml import Pipeline
    from pyspark.ml.feature import StringIndexer, VectorAssembler, MinMaxScaler
    from pyspark.ml.classification import DecisionTreeClassifier
    from pyspark.ml.evaluation import MulticlassClassificationEvaluator
    
-   def objective(params):
-       # Train a model using the provided hyperparameter value
-       catFeature = "Island"
-       numFeatures = ["CulmenLength", "CulmenDepth", "FlipperLength", "BodyMass"]
-       catIndexer = StringIndexer(inputCol=catFeature, outputCol=catFeature + "Idx")
-       numVector = VectorAssembler(inputCols=numFeatures, outputCol="numericFeatures")
-       numScaler = MinMaxScaler(inputCol = numVector.getOutputCol(), outputCol="normalizedFeatures")
-       featureVector = VectorAssembler(inputCols=["IslandIdx", "normalizedFeatures"], outputCol="Features")
-       mlAlgo = DecisionTreeClassifier(labelCol="Species",    
-                                       featuresCol="Features",
-                                       maxDepth=params['MaxDepth'], maxBins=params['MaxBins'])
-       pipeline = Pipeline(stages=[catIndexer, numVector, numScaler, featureVector, mlAlgo])
+   def objective(trial):
+       # Suggest hyperparameter values (maxDepth and maxBins):
+       max_depth = trial.suggest_int("MaxDepth", 0, 9)
+       max_bins = trial.suggest_categorical("MaxBins", [10, 20, 30])
+
+       # Define pipeline components
+       cat_feature = "Island"
+       num_features = ["CulmenLength", "CulmenDepth", "FlipperLength", "BodyMass"]
+       catIndexer = StringIndexer(inputCol=cat_feature, outputCol=cat_feature + "Idx")
+       numVector = VectorAssembler(inputCols=num_features, outputCol="numericFeatures")
+       numScaler = MinMaxScaler(inputCol=numVector.getOutputCol(), outputCol="normalizedFeatures")
+       featureVector = VectorAssembler(inputCols=[cat_feature + "Idx", "normalizedFeatures"], outputCol="Features")
+
+       dt = DecisionTreeClassifier(
+           labelCol="Species",
+           featuresCol="Features",
+           maxDepth=max_depth,
+           maxBins=max_bins
+       )
+
+       pipeline = Pipeline(stages=[catIndexer, numVector, numScaler, featureVector, dt])
        model = pipeline.fit(train)
-       
-       # Evaluate the model to get the target metric
-       prediction = model.transform(test)
-       eval = MulticlassClassificationEvaluator(labelCol="Species", predictionCol="prediction", metricName="accuracy")
-       accuracy = eval.evaluate(prediction)
-       
-       # Hyperopt tries to minimize the objective function, so you must return the negative accuracy.
-       return {'loss': -accuracy, 'status': STATUS_OK}
+
+       # Evaluate the model using accuracy.
+       predictions = model.transform(test)
+       evaluator = MulticlassClassificationEvaluator(
+           labelCol="Species",
+           predictionCol="prediction",
+           metricName="accuracy"
+       )
+       accuracy = evaluator.evaluate(predictions)
+
+       # Since Optuna minimizes the objective, return negative accuracy.
+       return -accuracy
     ```
 
-1. 添加一个新单元格并使用以下代码来执行下列操作：
-    - 定义一个搜索空间，该空间指定要用于一个或多个超参数的值的范围（如需更多详细信息，请参阅 Hyperopt 文档中的[定义搜索空间](http://hyperopt.github.io/hyperopt/getting-started/search_spaces/)）。
-    - 指定要使用的 Hyperopt 算法（如需更多详细信息，请参阅 Hyperopt 文档中的[算法](http://hyperopt.github.io/hyperopt/#algorithms)）。
-    - 使用 hyperopt.fmin**** 函数重复调用训练函数并尝试最大程度地减少损失。
+1. 添加新单元格，并使用以下代码运行优化试验：
 
     ```python
-   from hyperopt import fmin, tpe, hp
-   
-   # Define a search space for two hyperparameters (maxDepth and maxBins)
-   search_space = {
-       'MaxDepth': hp.randint('MaxDepth', 10),
-       'MaxBins': hp.choice('MaxBins', [10, 20, 30])
-   }
-   
-   # Specify an algorithm for the hyperparameter optimization process
-   algo=tpe.suggest
-   
-   # Call the training function iteratively to find the optimal hyperparameter values
-   argmin = fmin(
-     fn=objective,
-     space=search_space,
-     algo=algo,
-     max_evals=6)
-   
-   print("Best param values: ", argmin)
+   # Optimization run with 5 trials:
+   study = optuna.create_study()
+   study.optimize(objective, n_trials=5)
+
+   print("Best param values from the optimization run:")
+   print(study.best_params)
     ```
 
-1. 在代码以迭代方式运行训练函数 6 次（基于 max_evals**** 设置）的过程中进行观察。 每次运行都会由 MLflow 记录，你可以使用 &#9656;**** 切换按钮展开代码单元格下的“MLflow 运行”**** 输出，然后选择用于查看它们的“试验”**** 超链接。 每次运行都会分配一个随机名称，你可以在 MLflow 运行查看器中查看每个运行，以了解已记录参数和指标的详细信息。
-1. 当所有运行都完成后，你会观察到代码显示找到的最佳超参数值（导致损失最小的组合）的详细信息。 在本例中，MaxBins**** 参数被定义为从三个可能值（10、20 和 30）的列表中进行的选择 - 最佳值表示列表中从零开始的项（因此，0=10，1=20，2=30）。 MaxDepth**** 参数被定义为 0 到 10 之间的随机整数，将显示提供最佳结果的整数值。 若要详细了解如何为搜索空间指定超参数值范围，请参阅 Hyperopt 文档中的[参数表达式](http://hyperopt.github.io/hyperopt/getting-started/search_spaces/#parameter-expressions)。
-
-## 使用 Trials 类记录运行详细信息
-
-除了使用 MLflow 试验运行来记录每次迭代的详细信息之外，还可以使用 hyperopt.Trials**** 类来记录和查看每次运行的详细信息。
-
-1. 添加新单元格并使用以下代码查看 Trials**** 类记录的每次运行的详细信息：
-
-    ```python
-   from hyperopt import Trials
-   
-   # Create a Trials object to track each run
-   trial_runs = Trials()
-   
-   argmin = fmin(
-     fn=objective,
-     space=search_space,
-     algo=algo,
-     max_evals=3,
-     trials=trial_runs)
-   
-   print("Best param values: ", argmin)
-   
-   # Get details from each trial run
-   print ("trials:")
-   for trial in trial_runs.trials:
-       print ("\n", trial)
-    ```
+1. 观察代码如何以迭代方式运行训练函数 5 次，同时尽可能减少损失（基于 **n_trials** 设置）。 每次试用都会由 MLflow 记录，你可以使用 **&#9656;** 切换按钮展开代码单元格下的“**MLflow 运行**”输出，然后选择“**试验**”超链接查看这些输出。 每次运行都会分配一个随机名称，你可以在 MLflow 运行查看器中查看每个运行，以了解已记录参数和指标的详细信息。
+1. 当所有运行都完成后，你会观察到代码显示找到的最佳超参数值（导致损失最小的组合）的详细信息。 在本例中，MaxBins**** 参数被定义为从三个可能值（10、20 和 30）的列表中进行的选择 - 最佳值表示列表中从零开始的项（因此，0=10，1=20，2=30）。 MaxDepth**** 参数被定义为 0 到 10 之间的随机整数，将显示提供最佳结果的整数值。 
 
 ## 清理
 
