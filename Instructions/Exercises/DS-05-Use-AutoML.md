@@ -7,7 +7,7 @@ lab:
 
 AutoML 是 Azure Databricks 的一项功能，它会尝试将多种算法和参数用于你的数据来训练最佳的机器学习模型。
 
-完成此练习大约需要 30 分钟。
+完成此练习大约需要 45 分钟。
 
 > **备注**：Azure Databricks 用户界面可能会不断改进。 自编写本练习中的说明以来，用户界面可能已更改。
 
@@ -81,15 +81,15 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 若要使用 AutoML 训练机器学习模型，需要上传训练数据。 在本练习中，你将训练一个模型，根据观察（包括位置和身体测量）将企鹅分为三个物种之一。 你要将包含物种标签的训练数据加载到 Azure Databricks 数据仓库中的表中。
 
 1. 在 Azure Databricks 门户中你的工作区的边栏中，选择“SQL”下的“SQL 仓库”。********
-1. 请注意，工作区已包含名为“入门仓库”的 SQL 仓库。
+1. 请注意，工作区已包含名为“**无服务器初学者仓库**”的 SQL 仓库。
 1. 在 SQL 仓库的“操作”(&#8285;) 菜单中，选择“编辑”  。 然后将“群集大小”属性设置为 2X-Small 并保存更改 。
 1. 使用“开始”按钮启动 SQL 仓库（可能需要一两分钟）。
 
-> **注意**：如果 SQL 仓库无法启动，则订阅在预配 Azure Databricks 工作区的区域中的配额可能不足。 有关详细信息，请参阅[所需的 Azure vCPU 配额](https://docs.microsoft.com/azure/databricks/sql/admin/sql-endpoints#required-azure-vcpu-quota)。 如果发生这种情况，可以在仓库启动失败时尝试请求增加配额，如错误消息中所示。 或者，可以尝试删除工作区，并在其他区域创建新工作区。 可以将区域指定为设置脚本的参数，如下所示：`./mslearn-databricks/setup.ps1 eastus`
+    > **注意**：如果 SQL 仓库无法启动，则订阅在预配 Azure Databricks 工作区的区域中的配额可能不足。 有关详细信息，请参阅[所需的 Azure vCPU 配额](https://docs.microsoft.com/azure/databricks/sql/admin/sql-endpoints#required-azure-vcpu-quota)。 如果发生这种情况，可以在仓库启动失败时尝试请求增加配额，如错误消息中所示。 或者，可以尝试删除工作区，并在其他区域创建新工作区。 可以将区域指定为设置脚本的参数，如下所示：`./mslearn-databricks/setup.ps1 eastus`
 
 1. 将 [**penguins.csv**](https://raw.githubusercontent.com/MicrosoftLearning/mslearn-databricks/main/data/penguins.csv) 文件从 `https://raw.githubusercontent.com/MicrosoftLearning/mslearn-databricks/main/data/penguins.csv` 下载到本地计算机，并将其另存为 **penguins.csv**。
-1. 在 Azure Databricks 工作区门户的边栏中，选择“(+) 新建”，然后选择“文件上传”，将下载的 penguins.csv 文件上传到计算机************。
-1. 在“**上传数据**”页中，选择 **default** 架构并将表名设置为 **penguins**。 然后，选择页面左下角的“创建表”。
+1. 在 Azure Databricks 工作区门户的边栏中，选择“**(+)新建**”，然后选择“**添加或数据**”。 在“**添加数据**”页中，选择“**创建或修改表**”，并将下载的 **penguins.csv** 文件上传到计算机。
+1. 在“**从文件上传创建或修改表**”页中，选择 **default** 架构并将表名设置为 **penguins**。 然后选择“创建表”。
 1. 创建表后，查看其详细信息。
 
 ## 创建 AutoML 试验
@@ -97,10 +97,9 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 有了一些数据后，就可以将其与 AutoML 一起使用来训练模型。
 
 1. 在左侧边栏中，选择“试验”****。
-1. 在“试验”页上，选择“创建 AutoML 试验”。********
+1. 在“**试验**”页上，找到“**分类**”图块并选择“**开始训练**”。
 1. 配置 AutoML 试验，设置如下：
     - **群集**：*选择群集*
-    - **ML 问题类型**：分类
     - **输入训练数据集**：*浏览到“**default**”数据库并选择“**penguins**”表*
     - **预测目标**：物种
     - **试验名称**：Penguin-classification
@@ -112,7 +111,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
         - **正标签**：留空**
         - **中间数据存储位置**：MLflow 工件
 1. 使用“**启动 AutoML**”按钮启动试验。 关闭显示的任何信息对话框。
-1. 等待试验完成。 可以使用右侧的“**刷新**”按钮查看生成的运行的详细信息。
+1. 等待试验完成。 可以查看在“**运行**”选项卡下生成的运行的详细信息。
 1. 五分钟后，试验将结束。 刷新运行后将在列表顶部显示带来效果最佳的模型（基于所选的*精准率*指标）的运行。
 
 ## 部署性能最佳的模型
