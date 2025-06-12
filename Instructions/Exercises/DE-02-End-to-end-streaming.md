@@ -84,7 +84,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
     %sh
     rm -r /dbfs/device_stream
     mkdir /dbfs/device_stream
-    wget -O /dbfs/device_stream/device_data.csv https://github.com/MicrosoftLearning/mslearn-databricks/raw/main/data/device_data.csv
+    !wget -O /dbfs/device_stream/device_data.csv https://github.com/MicrosoftLearning/mslearn-databricks/raw/main/data/device_data.csv
      ```
 
 4. 使用单元格左侧的“&#9656; 运行单元格”菜单选项来运行该代码****。 然后等待代码运行的 Spark 作业完成。
