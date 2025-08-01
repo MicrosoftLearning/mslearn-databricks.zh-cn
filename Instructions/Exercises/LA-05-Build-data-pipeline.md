@@ -159,7 +159,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 1. 管道成功运行后，返回到最初创建的最近“*使用增量实时表创建管道*”笔记本，并在新单元格中运行以下代码，以验证是否已在指定存储位置创建了所有 3 个新表的文件：
 
      ```python
-    display(dbutils.fs.ls("dbfs:/pipelines/delta_lab/tables"))
+    display(dbutils.fs.ls("dbfs:/pipelines/delta_lab/schemas/default/tables"))
      ```
 
 1. 添加另一个代码单元格并运行以下代码，以验证是否已在**默认**数据库中创建了表：

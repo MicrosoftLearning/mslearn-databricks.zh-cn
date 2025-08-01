@@ -253,13 +253,15 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
    fine_tuned_model = response.fine_tuned_model
     ```
 
+4. 查看 JSON 响应并记下 `"fine_tuned_model"` 字段中生成的唯一名称。 在可选任务中将用到它。
+
     >注意****：微调模型可能需要 60 分钟以上，以便此时完成练习，并考虑模型的部署是一项可选任务，以防有时间备用。
 
 ## （可选）部署微调的模型
 
 现在你已经拥有了经过微调的模型，可以将其部署为自定义模型，并像使用任何其他已部署的模型一样，在 Azure AI Foundry 的“聊天”**** 操场中或通过聊天补全 API 使用它。
 
-1. 在新单元格中，运行以下代码以部署经过微调的模型，并替换占位符 `<YOUR_SUBSCRIPTION_ID>`、`<YOUR_RESOURCE_GROUP_NAME>` 和 `<YOUR_AZURE_OPENAI_RESOURCE_NAME>`：
+1. 在新单元格中，运行以下代码来部署经过微调的模型，替换占位符 `<YOUR_SUBSCRIPTION_ID>`、`<YOUR_RESOURCE_GROUP_NAME>`、`<YOUR_AZURE_OPENAI_RESOURCE_NAME>` 和 `<FINE_TUNED_MODEL>`：
    
     ```python
    import json
@@ -279,7 +281,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
        "properties": {
            "model": {
                "format": "OpenAI",
-               "name": "gpt-4o-ft",
+               "name": "<FINE_TUNED_MODEL>",
                "version": "1"
            }
        }
@@ -323,7 +325,9 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
    print(response.choices[0].message.content)
     ```
- 
+
+>注意****：可能需要几分钟才能完成经过微调的模型部署。 可以在 Azure AI Foundry 中的“部署”页中对其进行验证。****
+
 ## 清理
 
 使用完 Azure OpenAI 资源后，请记得在位于 `https://portal.azure.com` 的 **Azure 门户** 中删除部署或整个资源。
