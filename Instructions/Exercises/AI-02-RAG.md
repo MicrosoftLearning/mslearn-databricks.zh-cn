@@ -75,37 +75,22 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 ## 安装所需的库
 
-1. 在群集的页面中，选择“库”**** 选项卡。
-
-2. 选择“新安装”****。
-
-3. 选择“PyPI”**** 作为库源，并在“包”**** 字段中键入“`transformers==4.53.0`”。
-
-4. 选择“安装”  。
-
-5. 重复上述步骤以安装 `databricks-vectorsearch==0.56`。
-   
-## 创建笔记本并引入数据
-
 1. 在边栏中，使用“(+) 新建”**** 链接创建**笔记本**。 在“连接”**** 下拉列表中，选择群集（如果尚未选择）。 如果群集未运行，可能需要一分钟左右才能启动。
-
-1. 在笔记本的第一个单元格中，输入以下 SQL 查询以创建一个新卷，用于将本练习的数据存储在默认目录中：
-
+1. 在第一个代码单元格中，输入并运行以下代码以安装所需的库：
+   
     ```python
-   %sql 
-   CREATE VOLUME <catalog_name>.default.RAG_lab;
+   %pip install faiss-cpu
+   dbutils.library.restartPython()
     ```
+   
+## 引入数据
 
-1. 将 `<catalog_name>` 替换为你的工作区名称，因为 Azure Databricks 会自动创建一个以该名称命名的默认目录。
-1. 使用单元格左侧的“&#9656; 运行单元格”菜单选项来运行该代码****。 然后等待代码运行的 Spark 作业完成。
-1. 在新单元格中，运行以下代码，该代码使用 shell** 命令将数据从 GitHub 下载到 Unity 目录中。
-
-    ```python
-   %sh
-   wget -O /Volumes/<catalog_name>/default/RAG_lab/enwiki-latest-pages-articles.xml https://github.com/MicrosoftLearning/mslearn-databricks/raw/main/data/enwiki-latest-pages-articles.xml
-    ```
-
-1. 在新单元格中，运行以下代码以根据原始数据创建数据帧：
+1. 在新的浏览器选项卡中，下载将用作本练习中的数据的示例文件[](https://github.com/MicrosoftLearning/mslearn-databricks/raw/main/data/enwiki-latest-pages-articles.xml)：`https://github.com/MicrosoftLearning/mslearn-databricks/raw/main/data/enwiki-latest-pages-articles.xml`
+1. 回到“Databricks 工作区”选项卡，打开你的笔记本，选择“目录(CTRL + Alt + C)”资源管理器，然后选择 ➕ 图标以“添加数据”********。
+1. 在“添加数据”页中，选择“将文件上传到 DBFS”********。
+1. 在 DBFS 页中，命名目标目录 `RAG_lab` 并上传之前保存的 .xml 文件****。
+1. 在边栏中，选择“工作区”，然后再次打开笔记本****。
+1. 在新代码单元格中，输入以下代码以根据原始数据创建数据帧：
 
     ```python
    from pyspark.sql import SparkSession
@@ -118,7 +103,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
    # Read the XML file
    raw_df = spark.read.format("xml") \
        .option("rowTag", "page") \
-       .load("/Volumes/<catalog_name>/default/RAG_lab/enwiki-latest-pages-articles.xml")
+       .load("/FileStore/tables/RAG_lab/enwiki_latest_pages_articles.xml")
 
    # Show the DataFrame
    raw_df.show(5)
@@ -127,67 +112,61 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
    raw_df.printSchema()
     ```
 
-1. 在新单元格中，运行以下代码，将 `<catalog_name>` 替换为 Unity 目录的名称，以便清理和预处理数据以提取相关文本字段：
+1. 使用单元格左侧的“&#9656; 运行单元格”菜单选项来运行该代码****。 然后等待代码运行的 Spark 作业完成。
+1. 在新单元格中，运行以下代码，清理和预处理数据以提取相关文本字段：
 
     ```python
    from pyspark.sql.functions import col
 
    clean_df = raw_df.select(col("title"), col("revision.text._VALUE").alias("text"))
    clean_df = clean_df.na.drop()
-   clean_df.write.format("delta").mode("overwrite").saveAsTable("<catalog_name>.default.wiki_pages")
    clean_df.show(5)
     ```
 
-    如果打开目录 (CTRL + Alt + C)**** 资源管理器并刷新其窗格，则会看到在默认 Unity 目录中创建的 Delta 表。
-
 ## 生成嵌入并实现矢量搜索
 
-Databricks 的 Mosaic AI 矢量搜索是在 Azure Databricks 平台中集成的矢量数据库解决方案。 它利用分层可导航小世界 (HNSW) 算法优化嵌入的存储和检索。 它支持高效的最近的邻域搜索，其混合关键字相似性搜索功能通过组合基于矢量的搜索和基于关键字的搜索技术提供更相关的结果。
+FAISS（Facebook AI 相似性搜索）是由 Meta AI 开发的开源矢量数据库库，专为高效相似性搜索和密集矢量的聚类分析而设计。 FAISS 能够实现快速且可缩放的最近的邻域搜索，并且可以与混合搜索系统集成，将基于矢量的相似性与传统的基于关键字的技术相结合，从而提高搜索结果的相关性。
 
-1. 在新单元格中，运行以下 SQL 查询以在创建增量同步索引之前在源表中启用“更改数据馈送”功能。
+1. 在新单元格中，运行以下代码以加载预训练的 `all-MiniLM-L6-v2` 模型并将文本转换为嵌入：
 
     ```python
-   %sql
-   ALTER TABLE <catalog_name>.default.wiki_pages SET TBLPROPERTIES (delta.enableChangeDataFeed = true)
+   from sentence_transformers import SentenceTransformer
+   import numpy as np
+    
+   # Load pre-trained model
+   model = SentenceTransformer('all-MiniLM-L6-v2')
+    
+   # Function to convert text to embeddings
+   def text_to_embedding(text):
+       embeddings = model.encode([text])
+       return embeddings[0]
+    
+   # Convert the DataFrame to a Pandas DataFrame
+   pandas_df = clean_df.toPandas()
+    
+   # Apply the function to get embeddings
+   pandas_df['embedding'] = pandas_df['text'].apply(text_to_embedding)
+   embeddings = np.vstack(pandas_df['embedding'].values)
     ```
 
-2. 在新单元格中，运行以下代码以创建矢量搜索索引。
+1. 在新单元格中，运行以下代码以创建并查询 FAISS 索引：
 
     ```python
-   from databricks.vector_search.client import VectorSearchClient
-
-   client = VectorSearchClient()
-
-   client.create_endpoint(
-       name="vector_search_endpoint",
-       endpoint_type="STANDARD"
-   )
-
-   index = client.create_delta_sync_index(
-     endpoint_name="vector_search_endpoint",
-     source_table_name="<catalog_name>.default.wiki_pages",
-     index_name="<catalog_name>.default.wiki_index",
-     pipeline_type="TRIGGERED",
-     primary_key="title",
-     embedding_source_column="text",
-     embedding_model_endpoint_name="databricks-gte-large-en"
-    )
-    ```
-     
-如果打开目录 (CTRL + Alt + C)**** 资源管理器并刷新其窗格，则会看到在默认 Unity 目录中创建的索引。
-
-> **备注：** 在运行下一个代码单元格之前，请验证是否已成功创建索引。 为此，请在“目录”窗格中右键单击索引，然后选择“在目录资源管理器中打开”****。 等待索引状态变为“在线”****。
-
-3. 在新单元格中，运行以下代码以基于查询矢量搜索相关文档。
-
-    ```python
-   results_dict=index.similarity_search(
-       query_text="Anthropology fields",
-       columns=["title", "text"],
-       num_results=1
-   )
-
-   display(results_dict)
+   import faiss
+    
+   # Create a FAISS index
+   d = embeddings.shape[1]  # dimension
+   index = faiss.IndexFlatL2(d)  # L2 distance
+   index.add(embeddings)  # add vectors to the index
+    
+   # Perform a search
+   query_embedding = text_to_embedding("Anthropology fields")
+   k = 1  # number of nearest neighbors
+   distances, indices = index.search(np.array([query_embedding]), k)
+    
+   # Get the results
+   results = pandas_df.iloc[indices[0]]
+   display(results)
     ```
 
 验证输出是否找到与查询提示相关的相应 Wiki 页面。
@@ -199,29 +178,26 @@ Databricks 的 Mosaic AI 矢量搜索是在 Azure Databricks 平台中集成的�
 1. 在新单元格中运行以下代码，将检索到的数据与用户的查询相结合，为 LLM 创建丰富的提示。
 
     ```python
-   # Convert the dictionary to a DataFrame
-   results = spark.createDataFrame([results_dict['result']['data_array'][0]])
-
    from transformers import pipeline
-
+    
    # Load the summarization model
    summarizer = pipeline("summarization", model="facebook/bart-large-cnn", framework="pt")
-
+    
    # Extract the string values from the DataFrame column
-   text_data = results.select("_2").rdd.flatMap(lambda x: x).collect()
-
+   text_data = results["text"].tolist()
+    
    # Pass the extracted text data to the summarizer function
    summary = summarizer(text_data, max_length=512, min_length=100, do_sample=True)
-
+    
    def augment_prompt(query_text):
        context = " ".join([item['summary_text'] for item in summary])
-       return f"Query: {query_text}\nContext: {context}"
-
+       return f"{context}\n\nQuestion: {query_text}\nAnswer:"
+    
    prompt = augment_prompt("Explain the significance of Anthropology")
    print(prompt)
     ```
 
-3. 在新单元格中运行以下代码，以使用 LLM 生成响应。
+1. 在新单元格中运行以下代码，以使用 LLM 生成响应。
 
     ```python
    from transformers import GPT2LMHeadModel, GPT2Tokenizer

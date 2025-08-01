@@ -1,9 +1,9 @@
 ---
 lab:
-  title: 使用 Azure Databricks 实现 LLMOps
+  title: 通过 Azure Databricks 实现 LLMOps
 ---
 
-# 使用 Azure Databricks 实现 LLMOps
+# 通过 Azure Databricks 实现 LLMOps
 
 Azure Databricks 提供了一个统一的平台，可简化从数据准备到模型服务和监控的 AI 生命周期，从而优化机器学习系统的性能和效率。 它支持生成式 AI 应用程序的开发，利用 Unity Catalog（用于数据管理）、MLflow（用于模型跟踪）和 Mosaic AI 模型服务（用于部署 LLM）等功能。
 
@@ -41,22 +41,21 @@ Azure Databricks 提供了一个统一的平台，可简化从数据准备到模
 
 ## 部署所需的模块
 
-Azure 提供了一个名为 **Azure AI Studio** 的基于 Web 的门户，可用于部署、管理和探索模型。 你将通过使用 Azure OpenAI Studio 部署模型，开始探索 Azure OpenAI。
+Azure 提供了一个名为“Azure AI Foundry”的基于 Web 的门户，可用于部署、管理和探索模型。**** 你将通过使用 Azure OpenAI Foundry 部署模型，开始探索 Azure OpenAI。
 
-> **备注**：使用 Azure AI Studio 时，可能会显示建议你执行任务的消息框。 可以关闭这些消息框并按照本练习中的步骤进行操作。
+> **注意**：在使用 Azure AI Foundry 的过程中，系统可能会显示消息框，建议你执行某些任务。 可以关闭这些消息框并按照本练习中的步骤进行操作。
 
-1. 在 Azure 门户中的 Azure OpenAI 资源的“**概述**”页上，向下滚动到“**开始**”部分，然后选择转到 **Azure AI Studio** 的按钮。
+1. 在 Azure 门户中的 Azure OpenAI 资源的“概述”页上，向下滚动到“开始”部分，然后选择转到 Azure AI Foundry 的按钮。************
    
-1. 在 Azure AI Studio 的左侧窗格中，选择“**部署**”页并查看现有模型部署。 如果没有模型部署，请使用以下设置创建新的 **gpt-35-turbo** 模型部署：
-    - **部署名称**：*gpt-35-turbo*
-    - 模型：gpt-35-turbo
-    - **模型版本**：默认
+1. 在 Azure AI Foundry 的左侧窗格中，选择“部署”页并查看现有模型部署。**** 如果没有模型部署，请使用以下设置新建 **GPT-4o** 模型部署：
+    - **** 部署名称：gpt-4o**
     - **部署类型**：标准
-    - **每分钟令牌速率限制**：5K\*
+    - **模型版本**：*使用默认版本*
+    - 每分钟令牌的速率限制****：10,000\*
     - **内容筛选器**：默认
     - **启用动态配额**：已禁用
     
-> \*每分钟 5,000 个令牌的速率限制足以完成此练习，同时也为使用同一订阅的其他人留出容量。
+> \*每分钟 10,000 个标记的速率限制足以完成此练习，同时也为使用同一订阅的其他人留出容量。
 
 ## 预配 Azure Databricks 工作区
 
@@ -76,7 +75,7 @@ Azure 提供了一个名为 **Azure AI Studio** 的基于 Web 的门户，可用
 
 Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集在多个节点上并行处理数据。 每个群集由一个用于协调工作的驱动程序节点和多个用于执行处理任务的工作器节点组成。 在本练习中，将创建一个*单节点*群集，以最大程度地减少实验室环境中使用的计算资源（在实验室环境中，资源可能会受到限制）。 在生产环境中，通常会创建具有多个工作器节点的群集。
 
-> **提示**：如果 Azure Databricks 工作区中已有一个具有 13.3 LTS ML**<u></u>** 或更高运行时版本的群集，则可以使用它来完成此练习并跳过此过程。
+> **提示**：如果 Azure Databricks 工作区中已有一个具有 16.4 LTS <u>ML</u> 或更高运行时版本的群集，则可以使用它来完成此练习并跳过此过程****。
 
 1. 在Azure 门户中，浏览到创建 Azure Databricks 工作区的资源组。
 2. 单击 Azure Databricks 服务资源。
@@ -88,39 +87,15 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 5. 在“新建群集”页中，使用以下设置创建新群集：
     - 群集名称：用户名的群集（默认群集名称）
     - **策略**：非受限
-    - 群集模式：单节点
-    - 访问模式：单用户（选择你的用户帐户）
-    - Databricks Runtime 版本****：选择最新非 beta 版本运行时的 ML***<u></u>** 版本（不是****标准运行时版本），该版本符合以下条件：*
-        - 不使用 GPU**
-        - 包括 Scala > 2.11
-        - *包括 Spark > **3.4***
+    - 机器学习****：已启用
+    - Databricks Runtime****：16.4 LTS
     - 使用 Photon 加速****：未选定<u></u>
-    - **节点类型**：Standard_D4ds_v5
-    - 在处于不活动状态 20 分钟后终止**********
+    - 辅助角色类型****：Standard_D4ds_v5
+    - 单节点****：已选中
 
 6. 等待群集创建完成。 这可能需要一到两分钟时间。
 
 > 注意：如果群集无法启动，则订阅在预配 Azure Databricks 工作区的区域中的配额可能不足。 请参阅 [CPU 内核限制阻止创建群集](https://docs.microsoft.com/azure/databricks/kb/clusters/azure-core-limit)，了解详细信息。 如果发生这种情况，可以尝试删除工作区，并在其他区域创建新工作区。
-
-## 安装所需的库
-
-1. 在 Databricks 工作区中，转到“工作区”**** 部分。
-
-2. 选择“创建”****，然后选择“笔记本”****。
-
-3. 为笔记本命名，然后选择“`Python`”作为语言。
-
-4. 在第一个代码单元格中，输入并运行以下代码以安装 OpenAI 库：
-   
-     ```python
-    %pip install openai
-     ```
-
-5. 安装完成后，在新单元格中重启内核：
-
-     ```python
-    %restart_python
-     ```
 
 ## 使用 MLflow 记录 LLM
 
@@ -133,7 +108,7 @@ MLflow 的 LLM 跟踪功能允许记录参数、指标、预测和项目。 参�
 
     os.environ["AZURE_OPENAI_API_KEY"] = "your_openai_api_key"
     os.environ["AZURE_OPENAI_ENDPOINT"] = "your_openai_endpoint"
-    os.environ["AZURE_OPENAI_API_VERSION"] = "2023-03-15-preview"
+    os.environ["AZURE_OPENAI_API_VERSION"] = "2024-05-01-preview"
      ```
 1. 在新单元格中，运行以下代码来初始化 Azure OpenAI 客户端：
 
@@ -161,7 +136,7 @@ MLflow 的 LLM 跟踪功能允许记录参数、指标、预测和项目。 参�
     with mlflow.start_run():
 
         response = client.chat.completions.create(
-            model="gpt-35-turbo",
+            model="gpt-4o",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": "Tell me a joke about animals."},
@@ -177,13 +152,11 @@ MLflow 的 LLM 跟踪功能允许记录参数、指标、预测和项目。 参�
 
 ## 监视模型
 
-1. 在左侧边栏中，选择“**试验**”，然后选择与用于本练习的笔记本关联的实验。 选择最新的运行并在“概述”页中验证是否有一个记录的参数：`completion_tokens`。 此命令 `mlflow.openai.autolog()` 将默认记录每个运行的跟踪，但也可以使用 `mlflow.log_param()` 记录其他参数，以便稍后使用该参数监视模型。
-
-1. 选择“**跟踪**”选项卡，然后选择最后创建的跟踪选项卡。 验证 `completion_tokens` 参数是否为跟踪输出的一部分：
+运行最后一个单元格后，MLflow Trace UI 会自动与该单元格的输出一起显示。 你也可以通过以下方式查看：在左侧边栏中选择“实验”，然后打开你的笔记本对应的实验运行记录****：
 
    ![MLFlow 跟踪 UI](./images/trace-ui.png)  
 
-开始监视模型后，可以比较不同运行中的跟踪以检测数据偏移。 在一段时间内查找输入数据分布、模型预测或性能指标的重大更改。 可以使用统计测试或可视化工具来帮助进行此分析。
+此命令 `mlflow.openai.autolog()` 将默认记录每个运行的跟踪，但也可以使用 `mlflow.log_param()` 记录其他参数，以便稍后使用该参数监视模型。 开始监视模型后，可以比较不同运行中的跟踪以检测数据偏移。 在一段时间内查找输入数据分布、模型预测或性能指标的重大更改。 还可使用统计测试或可视化工具来帮助进行此分析。
 
 ## 清理
 
