@@ -79,7 +79,7 @@ Azure 提供了一个名为“Azure AI Foundry”的基于 Web 的门户，可�
 
 Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集在多个节点上并行处理数据。 每个群集由一个用于协调工作的驱动程序节点和多个用于执行处理任务的工作器节点组成。 在本练习中，将创建一个*单节点*群集，以最大程度地减少实验室环境中使用的计算资源（在实验室环境中，资源可能会受到限制）。 在生产环境中，通常会创建具有多个工作器节点的群集。
 
-> **提示**：如果 Azure Databricks 工作区中已有一个具有 15.4 LTS <u>ML</u> 或更高运行时版本的群集，则可以使用它来完成此练习并跳过此过程。****
+> **提示**：如果 Azure Databricks 工作区中已有一个具有 16.4 LTS <u>ML</u> 或更高运行时版本的群集，则可以使用它来完成此练习并跳过此过程****。
 
 1. 在Azure 门户中，浏览到创建 Azure Databricks 工作区的资源组。
 2. 单击 Azure Databricks 服务资源。
@@ -92,7 +92,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
     - 群集名称：用户名的群集（默认群集名称）
     - **策略**：非受限
     - 机器学习****：已启用
-    - Databricks Runtime****：15.4 LTS
+    - Databricks Runtime****：16.4 LTS
     - 使用 Photon 加速****：未选定<u></u>
     - 辅助角色类型****：Standard_D4ds_v5
     - 单节点****：已选中

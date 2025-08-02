@@ -20,17 +20,29 @@ Azure Databricks *工作区*为管理 Azure 上的 Databricks 群集、数据和
 > **提示**：如果你已有 Azure Databricks 工作区，则可以跳过此过程并使用现有工作区。
 
 1. 登录到 Azure 门户，地址为 ****。
-2. 请使用以下设置创建 **Azure Databricks** 资源：
-    - 订阅****：*选择 Azure 订阅*
-    - **资源组**：*创建名为 `msl-xxxxxxx`（其中“xxxxxxx”是唯一值）的新资源组*
-    - **工作区名称**：`databricks-xxxxxxx`*（其中“xxxxxxx”是资源组名称中使用的值）*
-    - **区域**：*选择任何可用区域*
-    - **定价层**：*高级*或*试用版*
-    - **受管理资源组名称**：`databricks-xxxxxxx-managed`*（其中“xxxxxxx”是资源组名称中使用的值）*
+2. 使用页面顶部搜索栏右侧的 **[\>_]** 按钮在 Azure 门户中创建新的 Cloud Shell，选择 ***PowerShell*** 环境。 Cloud Shell 在 Azure 门户底部的窗格中提供命令行界面，如下所示：
 
-    ![Azure 门户中“创建 Azure Databricks 工作区”页面的屏幕截图。](./images/create-databricks.png)
+    ![具有 Cloud Shell 窗格的 Azure 门户](./images/cloud-shell.png)
 
-3. 选择“**查看 + 创建**”，然后等待部署完成。 然后转到资源并启动工作区。
+    > **备注**：如果以前创建了使用 *Bash* 环境的 Cloud Shell，请将其切换到 ***PowerShell***。
+
+3. 请注意，可以通过拖动窗格顶部的分隔条来调整 Cloud Shell 的大小，或使用窗格右上角的 **&#8212;**、**&#10530;** 和 **X** 图标来最小化、最大化和关闭窗格。 有关如何使用 Azure Cloud Shell 的详细信息，请参阅 [Azure Cloud Shell 文档](https://docs.microsoft.com/azure/cloud-shell/overview)。
+
+4. 在 PowerShell 窗格中，输入以下命令以克隆此存储库：
+
+    ```
+    rm -r mslearn-databricks -f
+    git clone https://github.com/MicrosoftLearning/mslearn-databricks
+    ```
+
+5. 克隆存储库后，请输入以下命令以运行 **setup.ps1** 脚本，以在可用区域中预配 Azure Databricks 工作区：
+
+    ```
+    ./mslearn-databricks/setup.ps1
+    ```
+
+6. 如果出现提示，请选择要使用的订阅（仅当有权访问多个 Azure 订阅时才会发生这种情况）。
+7. 等待脚本完成 - 这通常需要大约 5 分钟，但在某些情况下可能需要更长的时间。 在等待时，请查看 Azure Databricks 文档中的 [Azure Databricks 上的探索式数据分析](https://learn.microsoft.com/azure/databricks/exploratory-data-analysis/)一文。
 
 ## 创建群集
 
