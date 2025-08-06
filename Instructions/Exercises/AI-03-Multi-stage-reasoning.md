@@ -119,7 +119,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 1. 在第一个代码单元格中，输入并运行以下代码以安装所需的库：
    
     ```python
-   %pip install langchain openai langchain_openai faiss-cpu
+   %pip install langchain openai langchain_openai langchain-community faiss-cpu
     ```
 
 1. 安装完成后，在新单元格中重启内核：
