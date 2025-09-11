@@ -1,15 +1,17 @@
 ---
 lab:
-  title: 使用 Delta Live Tables 创建数据管道
+  title: 创建 Lakeflow 声明性管道
 ---
 
-# 使用 Delta Live Tables 创建数据管道
+# 创建 Lakeflow 声明性管道
 
-增量实时表是一个声明性框架，用于生成可靠、可维护且可测试的数据处理管道。 管道是使用 Delta Live Tables 配置和运行数据处理工作流的主要单元。 它通过 Python 或 SQL 中声明的有向无环图 (DAG) 将数据源链接到目标数据集。
+Lakeflow 声明性管道是 Databricks Lakehouse 平台中的框架，用于以声明性方式构建和运行数据管道。**** 这意味着你指定要实现的数据转换，系统会自动确定如何高效执行它们，从而解决了传统数据工程的诸多复杂性。
+
+Lakeflow 声明性管道摒弃了复杂、低级别的详细信息，简化了 ETL（提取、转换、加载）管道的开发。 在 SQL 或 Python 中使用更简单的声明性语法，而不是编写规定每个步骤的程序代码。
 
 完成本实验室大约需要 40 分钟。
 
-> **备注**：Azure Databricks 用户界面可能会不断改进。 自编写本练习中的说明以来，用户界面可能已更改。
+> **备注**：Azure Databricks 用户界面可能会不断改进。 自编写本练习中的说明以来，用户界面可能已更改。 Lakeflow 声明性管道从 Databricks 的增量实时表 (DLT) 演变而来，为批处理和流式处理工作负载提供了一种统一的方法。
 
 ## 预配 Azure Databricks 工作区
 
@@ -41,7 +43,7 @@ lab:
 
 6. 如果出现提示，请选择要使用的订阅（仅当有权访问多个 Azure 订阅时才会发生这种情况）。
 
-7. 等待脚本完成 - 这通常需要大约 5 分钟，但在某些情况下可能需要更长的时间。 在等待期间，请查看 Azure Databricks 文档中的[什么是增量实时表？](https://learn.microsoft.com/azure/databricks/delta-live-tables/)文章。
+7. 等待脚本完成 - 这通常需要大约 5 分钟，但在某些情况下可能需要更长的时间。 等待期间，请查看 Azure Databricks 文档中的 [Lakeflow 声明性管道](https://learn.microsoft.com/azure/databricks/dlt/)一文。
 
 ## 创建群集
 
@@ -77,7 +79,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 1. 在边栏中，使用“(+) 新建”**** 链接创建**笔记本**。
 
-2. 将默认笔记本名称 (**Untitled Notebook *[date]***) 更改为 `Create a pipeline with Delta Live tables`，然后在“**连接**”下拉列表中选择群集（如果尚未选择）。 如果群集未运行，可能需要一分钟左右才能启动。
+2. 将默认笔记本名称 (**Untitled Notebook *[date]***) 更改为 `Data Ingestion and Exploration`，然后在“**连接**”下拉列表中选择群集（如果尚未选择）。 如果群集未运行，可能需要一分钟左右才能启动。
 
 3. 在笔记本的第一个单元格中输入以下代码，该代码使用 *shell* 命令将数据文件从 GitHub 下载到群集使用的文件系统中。
 
@@ -90,16 +92,16 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 4. 使用单元格左侧的“&#9656; 运行单元格”菜单选项来运行该代码****。 然后等待代码运行的 Spark 作业完成。
 
-## 使用 SQL 创建 Delta Live Tables 管道
+## 使用 SQL 创建 Lakeflow 声明性管道
 
-1. 创建新的笔记本并将其重命名为 `Pipeline Notebook`。
+1. 创建新的笔记本并将其重命名为 `Covid Pipeline Notebook`。
 
 1. 在笔记本名称旁边，选择 **Python** 并将默认语言更改为 **SQL**。
 
-1. 在第一个单元格中输入以下代码，无需运行。 创建管道后，将执行所有单元格。 此代码定义一个 Delta Live Table，该表将由以前下载的原始数据填充：
+1. 在第一个单元格中输入以下代码，无需运行。** 创建管道后，将执行所有单元格。 此代码定义一个具体化视图，该视图将由以前下载的原始数据填充：
 
      ```sql
-    CREATE OR REFRESH LIVE TABLE raw_covid_data
+    CREATE OR REFRESH MATERIALIZED VIEW raw_covid_data
     COMMENT "COVID sample dataset. This data was ingested from the COVID-19 Data Repository by the Center for Systems Science and Engineering (CSSE) at Johns Hopkins University."
     AS
     SELECT
@@ -114,7 +116,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 1. 在第一个单元格下，使用 **+ 代码**图标添加新的单元格，并输入以下代码，以便在分析之前查询、筛选和格式化上一个表中的数据。
 
      ```sql
-    CREATE OR REFRESH LIVE TABLE processed_covid_data(
+    CREATE OR REFRESH MATERIALIZED VIEW processed_covid_data(
       CONSTRAINT valid_country_region EXPECT (Country_Region IS NOT NULL) ON VIOLATION FAIL UPDATE
     )
     COMMENT "Formatted and filtered data for analysis."
@@ -131,7 +133,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 1. 在第三个新代码单元中，输入以下代码，该代码将创建扩充的数据视图，以供在管道成功执行后进行进一步分析。
 
      ```sql
-    CREATE OR REFRESH LIVE TABLE aggregated_covid_data
+    CREATE OR REFRESH MATERIALIZED VIEW aggregated_covid_data
     COMMENT "Aggregated daily data for the US with total counts."
     AS
     SELECT
@@ -143,20 +145,20 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
     GROUP BY Report_Date;
      ```
      
-1. 在左侧边栏中选择“增量实时表”**** ，然后选择“创建管道”****。
+1. 在左边栏中选择“作业和管道”，然后选择“ETL 管道”。********
 
 1. 在“创建管道”**** 页中，使用以下设置创建新管道：
     - **管道名称**：`Covid Pipeline`
     - **产品版本**：高级
     - **管道模式**：触发
-    - **源代码**：*浏览到*Users/user@name*文件夹*中的“管道笔记本”*笔记本*。
+    - **源代码**：浏览到 Users/user@name 文件夹中的“Covid 管道笔记本”笔记本。******
     - **存储选项**：Hive 元存储
     - **存储位置**：`dbfs:/pipelines/delta_lab`
     - **目标架构**：*输入*`default`
 
 1. 选择“创建”****，然后选择“开始”****。 然后等待管道运行（可能需要一些时间）。
  
-1. 管道成功运行后，返回到最初创建的最近“*使用增量实时表创建管道*”笔记本，并在新单元格中运行以下代码，以验证是否已在指定存储位置创建了所有 3 个新表的文件：
+1. 管道成功运行后，返回到最初创建的最近“数据引入和浏览”笔记本，并在新单元格中运行以下代码，以验证是否已在指定存储位置创建了所有 3 个新表的文件：**
 
      ```python
     display(dbutils.fs.ls("dbfs:/pipelines/delta_lab/schemas/default/tables"))
@@ -174,7 +176,7 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 创建表后，可以将这些表加载到数据帧并可视化数据。
 
-1. 在“*使用增量实时表创建管道*”笔记本中，添加新的代码单元格并运行以下代码，以将 `aggregated_covid_data` 加载到数据帧中：
+1. 在“数据引入和浏览”笔记本中，添加新的代码单元格并运行以下代码，将 `aggregated_covid_data` 加载到数据帧中：**
 
     ```sql
     %sql

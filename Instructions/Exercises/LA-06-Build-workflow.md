@@ -1,11 +1,11 @@
 ---
 lab:
-  title: 使用 Azure Databricks Workflows 部署工作负载
+  title: 使用 Azure Databricks Lakeflow 作业部署工作负载
 ---
 
-# 使用 Azure Databricks Workflows 部署工作负载
+# 使用 Azure Databricks Lakeflow 作业部署工作负载
 
-Azure Databricks Workflows 提供了一个可靠的平台，用于高效部署工作负荷。 借助 Azure Databricks Jobs 和 Delta Live Tables 等功能，用户可以协调复杂的数据处理、机器学习和分析管道。
+Azure Databricks Lakeflow 作业提供了一个可靠的平台，用于高效部署工作负载。 借助 Azure Databricks Jobs 和 Delta Live Tables 等功能，用户可以协调复杂的数据处理、机器学习和分析管道。
 
 完成本实验室大约需要 40 分钟。
 
@@ -41,7 +41,7 @@ Azure Databricks Workflows 提供了一个可靠的平台，用于高效部署�
 
 6. 如果出现提示，请选择要使用的订阅（仅当有权访问多个 Azure 订阅时才会发生这种情况）。
 
-7. 等待脚本完成 - 这通常需要大约 5 分钟，但在某些情况下可能需要更长的时间。 在等待期间，请查看 Azure Databricks 文档中的[安排和协调工作流](https://learn.microsoft.com/azure/databricks/jobs/)文章。
+7. 等待脚本完成 - 这通常需要大约 5 分钟，但在某些情况下可能需要更长的时间。 等待期间，请查看 Azure Databricks 文档中的 [Lakeflow 作业](https://learn.microsoft.com/azure/databricks/jobs/)一文。
 
 ## 创建群集
 
@@ -143,9 +143,9 @@ Azure Databricks 是一个分布式处理平台，可使用 Apache Spark 群集�
 
 Azure Databricks 可管理所有作业的任务业务流程、群集管理、监视和错误报告。 你可以立即运行作业，通过易于使用的调度系统定期运行，只要新文件到达外部位置就可以这样做；也可以连续运行以确保作业实例始终处于运行状态。
 
-1. 在左侧边栏中，选择“工作流”****。
+1. 在你的工作区中，单击边栏中的 ![“工作区”图标](./images/WorkflowsIcon.svg)。 “作业和管道”。****
 
-2. 在“工作流”窗格中，选择“创建作业”****。
+2. 在“作业和管道”窗格中，选择“创建”，然后选择“作业”。********
 
 3. 将默认作业名称 (**New job *[date]***) 更改为 `ETL job`。
 
@@ -158,7 +158,7 @@ Azure Databricks 可管理所有作业的任务业务流程、群集管理、监
 
 5. 选择“创建任务”****。
 
-6. 选择“立即运行”。
+6. 选择“立即运行”****。
 
 7. 作业开始运行后，可以通过在左侧栏中选择“**作业运行**”来监控其执行情况。
 
